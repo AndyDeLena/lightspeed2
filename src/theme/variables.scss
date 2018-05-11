@@ -23,6 +23,7 @@ $app-direction: ltr;
 // http://ionicframework.com/docs/theming/overriding-ionic-variables/
 
 
+$menu-width: 250px;
 
 
 // Named Color Variables
@@ -34,12 +35,40 @@ $app-direction: ltr;
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #488aff,
+  primary:    #0092FF,
   secondary:  #32db64,
   danger:     #f53d3d,
   light:      #f4f4f4,
-  dark:       #222
+  dark:       #222,
+  bg-gray:    #e0e0e0,
+  white:      #ffffff,
+  blue:       #0083ff,
+  green:      #32db64,
+  red:        #f53d3d,
+  yellow:     #ffff00,
+  fuchsia:    #ff00ff,
+  aqua:       #00ffff,
+  orange:     #ff9600,
+  pink:       #ffafc8,
+  purple:     #9632ff,
+  lightgray:  #f3f3f3,
+  darkgray:   #919191,
+  lightorange: #ffa63a,
+  White:      #ffffff,
+  Blue:       #0083ff,
+  Green:      #32db64,
+  Red:        #f53d3d,
+  Yellow:     #ffff00,
+  Fuchsia:    #ff00ff,
+  Aqua:       #00ffff,
+  Orange:     #ff9600,
+  Pink:       #ffafc8,
+  Purple:     #9632ff,
+  Off:        #e0e0e0,
+  off:        #e0e0e0
 );
+
+$background-color: #e0e0e0;
 
 
 // App iOS Variables
@@ -86,3 +115,4 @@ $colors: (
 
 @import "roboto";
 @import "noto-sans";
+

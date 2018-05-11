@@ -14,3 +14,94 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+// http://ionicframework.com/docs/theming/
+
+
+// App Global Sass
+// --------------------------------------------------
+// Put style rules here that you want to apply globally. These
+// styles are for the entire app and not just one component.
+// Additionally, this file can be also used as an entry point
+// to import other Sass files to be included in the output CSS.
+//
+// Shared Sass variables, which can be used to adjust Ionic's
+// default Sass variables, belong in "theme/variables.scss".
+//
+// To declare rules for a specific mode, create a child rule
+// for the .md, .ios, or .wp mode classes. The mode class is
+// automatically applied to the <body> element in the app.
+
+ion-title img {
+	max-height: 50px;
+}
+
+ion-input {
+	border: 1px solid dodgerblue;
+	border-radius: 5px;
+}
+
+.error-card {
+	background-color: #f7b7b7; 
+	border-color: #f9cccc; 
+	color: #8a3b3b; 
+	text-align: center;
+}
+
+.warning-card {
+	background-color: #fcf8e3; 
+	border-color: #faf2cc; 
+	color: #8a6d3b; 
+	text-align: center;
+}
+
+@font-face{
+    font-family: DroidSansMono;
+    src: url('../assets/fonts/droid-sans-mono.woff2') format('woff2');
+}
+
+.back-button-md {display:none !important;}
+
+.sip-black {
+    border-bottom: 1px solid black;
+    margin: 10px -5px 10px -5px;
+}
+
+.sep {
+    margin: 20px -5px 20px -5px;
+}
+
+.sep-large {
+    margin: 20px -5px 40px -5px;
+}
+
+.sep-mini {
+    margin: 10px -5px 10px -5px;
+}
+
+.sep-menu{
+    margin: 50px -5 50px -5px;
+}
+
+.pretty-item {
+	border: 1px solid darkgray;
+	border-radius: 5px;
+}
+
+.button-80 {
+	width: 80%;
+	margin-left: 10%;
+}
+
+.wrap {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+}
+
+.color-div {
+	display: inline-block;
+	margin: 10px 0 0 2%;
+	flex-grow: 1;
+	width: calc(100% * (1/3) - 12px);
+}

@@ -1,0 +1,80 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>
+        New Rep Type
+      </ion-title>
+      <ion-buttons end>
+        <button ion-button color="white" (click)="dismiss()">
+          Cancel
+        </button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+
+<ion-content>
+
+  <div class="sep-mini"></div>
+
+  <ion-item color="white">
+    <ion-label color="dark">Name</ion-label>
+    <ion-input [(ngModel)]="name" text-right item-end plaeholder="Enter a name..."></ion-input>
+  </ion-item>
+  <ion-item color="white">
+    <ion-label color="dark">Start At</ion-label>
+    <ion-select [(ngModel)]="startAt" placeholder="Choose...">
+      <ion-option *ngFor="let opt of startAtOptions">{{opt}}</ion-option>
+    </ion-select>
+  </ion-item>
+
+<div class="sep"></div>
+
+  <ion-list-header color="darkgray">
+    <ion-label>SEGMENTS</ion-label>
+    <button ion-button icon-left item-end outline color="white" (click)="addSegment()">
+      <ion-icon name="md-add"></ion-icon>
+      Add
+    </button>
+  </ion-list-header>
+
+  <div class="sep"></div>
+
+  <div *ngFor="let seg of segments">
+    <ion-item color="white">
+      <ion-label color="primary"> Segment {{seg.id}} </ion-label>
+      <button ion-button item-end outline color="red" (click)="removeSegment(seg.id)">Remove</button>
+    </ion-item>
+    <ion-row style="background-color: white">
+      <ion-col col-auto>
+        <ion-item no-lines color="white">
+          <ion-label>LED Color</ion-label>
+        </ion-item>
+      </ion-col>
+
+      <ion-col *ngFor="let color of util.colors">
+        <button ion-button small block [style.outline]="outlineSegColor(seg.id, color)" color="{{color}}" (click)="selectSegColor(seg.id, color)">
+          {{color.toUpperCase()}}
+        </button>
+      </ion-col>
+    </ion-row>
+    <ion-item no-lines color="white">
+      <ion-label color="dark">Direction</ion-label>
+      <ion-select [(ngModel)]="seg.direction">
+        <ion-option>Forward</ion-option>
+        <ion-option>Backward</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item no-lines color="white">
+      <ion-label color="dark">Distance</ion-label>
+      <ion-select [(ngModel)]="seg.distance">
+        <ion-option *ngFor="let d of distanceOptions">{{d}}</ion-option>
+      </ion-select>
+    </ion-item>
+    <div class="sep-mini"></div>
+  </div>
+
+</ion-content>
+
+<ion-footer>
+  <button ion-button block large color="green" (click)="saveRepType()">Save Rep Type</button>
+</ion-footer>

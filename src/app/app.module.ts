@@ -3,38 +3,54 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { AboutPage } from '../pages/about/about';
-import { ContactPage } from '../pages/contact/contact';
-import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
+import { RepModePage } from '../pages/rep-mode/rep-mode';
+import { ManualControlPage } from '../pages/manual-control/manual-control';
+import { HelpPage } from '../pages/help/help';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { ConnectionProvider } from '../providers/connection/connection';
+import { AlertsProvider } from '../providers/alerts/alerts';
+import { UtilitiesProvider } from '../providers/utilities/utilities';
+import { WorkoutProvider } from '../providers/workout/workout';
+
+import { IonicStorageModule } from '@ionic/storage';
+
+import { BLE } from '@ionic-native/ble';
+import { Insomnia } from '@ionic-native/insomnia';
 
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
-    TabsPage
+    TabsPage,
+    RepModePage,
+    ManualControlPage,
+    HelpPage
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
-    TabsPage
+    TabsPage,
+    RepModePage,
+    ManualControlPage,
+    HelpPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    ConnectionProvider,
+    AlertsProvider,
+    UtilitiesProvider,
+    WorkoutProvider,
+    BLE,
+    Insomnia
   ]
 })
 export class AppModule {}

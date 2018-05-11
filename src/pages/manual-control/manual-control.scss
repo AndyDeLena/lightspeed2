@@ -1,0 +1,14 @@
+page-manual-control {
+
+    .remote-button {
+        width: 100%;
+        background-color: bg-gray;
+    }
+
+    .light-div {
+        display: inline-block;
+        margin:10px 0 0 2%;
+        flex-grow: 1;
+        width: calc(100% * (1/5) - 12px);
+    }
+}
