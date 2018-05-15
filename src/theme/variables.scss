@@ -52,6 +52,7 @@ $colors: (
   pink:       #ffafc8,
   purple:     #9632ff,
   lightgray:  #f3f3f3,
+    mediumgray: #b5b5b5,
   darkgray:   #919191,
   lightorange: #ffa63a,
   White:      #ffffff,
@@ -69,6 +70,10 @@ $colors: (
 );
 
 $background-color: #e0e0e0;
+
+$item-md-detail-push-show: true;
+$item-wp-detail-push-show: true;
+
 
 
 // App iOS Variables

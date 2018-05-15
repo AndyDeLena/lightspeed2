@@ -1,39 +1,43 @@
 <ion-header>
-    <ion-toolbar color="primary">
-      <ion-title>
-        New Rep Type
-      </ion-title>
-      <ion-buttons end>
-        <button ion-button color="white" (click)="dismiss()">
-          Cancel
-        </button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  
+  <ion-toolbar color="primary">
+    <ion-title>
+      New Rep Type
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button color="white" (click)="dismiss()">
+        Cancel
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 
 <ion-content>
 
   <div class="sep-mini"></div>
 
-  <ion-item color="white">
-    <ion-label color="dark">Name</ion-label>
-    <ion-input [(ngModel)]="name" text-right item-end plaeholder="Enter a name..."></ion-input>
-  </ion-item>
-  <ion-item color="white">
-    <ion-label color="dark">Start At</ion-label>
-    <ion-select [(ngModel)]="startAt" placeholder="Choose...">
-      <ion-option *ngFor="let opt of startAtOptions">{{opt}}</ion-option>
-    </ion-select>
-  </ion-item>
+  <ion-list>
+    <ion-item color="white">
+      <ion-label color="dark">Name</ion-label>
+      <ion-input [(ngModel)]="name" text-right item-end placeholder="Enter a name..."></ion-input>
+    </ion-item>
+    <ion-item color="white">
+      <ion-label color="dark">Start At</ion-label>
+      <ion-select [(ngModel)]="startAt" placeholder="Select...">
+        <ion-option *ngFor="let opt of startAtOptions">{{opt}}</ion-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
 
-<div class="sep"></div>
+  <div class="sep"></div>
 
-  <ion-list-header color="darkgray">
-    <ion-label>SEGMENTS</ion-label>
-    <button ion-button icon-left item-end outline color="white" (click)="addSegment()">
+  <ion-list-header color="mediumgray">
+    <ion-label>
+      <strong>SEGMENTS</strong>
+    </ion-label>
+    <button ion-button icon-left item-end color="green" (click)="addSegment()">
       <ion-icon name="md-add"></ion-icon>
-      Add
+      <strong>Add</strong>
     </button>
   </ion-list-header>
 
@@ -53,20 +57,20 @@
 
       <ion-col *ngFor="let color of util.colors">
         <button ion-button small block [style.outline]="outlineSegColor(seg.id, color)" color="{{color}}" (click)="selectSegColor(seg.id, color)">
-          {{color.toUpperCase()}}
+          <strong>{{color.toUpperCase()}}</strong>
         </button>
       </ion-col>
     </ion-row>
     <ion-item no-lines color="white">
       <ion-label color="dark">Direction</ion-label>
-      <ion-select [(ngModel)]="seg.direction">
+      <ion-select [(ngModel)]="seg.direction" placeholder="Select...">
         <ion-option>Forward</ion-option>
         <ion-option>Backward</ion-option>
       </ion-select>
     </ion-item>
     <ion-item no-lines color="white">
       <ion-label color="dark">Distance</ion-label>
-      <ion-select [(ngModel)]="seg.distance">
+      <ion-select [(ngModel)]="seg.distance" placeholder="Select...">
         <ion-option *ngFor="let d of distanceOptions">{{d}}</ion-option>
       </ion-select>
     </ion-item>
@@ -76,5 +80,7 @@
 </ion-content>
 
 <ion-footer>
-  <button ion-button block large color="green" (click)="saveRepType()">Save Rep Type</button>
+  <button ion-button block large color="green" (click)="saveRepType()">
+    <strong>Save Rep Type</strong>
+  </button>
 </ion-footer>

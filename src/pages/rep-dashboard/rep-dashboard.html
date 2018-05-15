@@ -1,0 +1,85 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Rep Dashboard</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content>
+
+  <ion-list-header color="mediumgray">
+    <strong>OPTIONS</strong>
+    <button ion-button clear item-right color="white" (click)="showHideConfig()">{{configButton}}</button>
+  </ion-list-header>
+
+  <div *ngIf="!configHidden">
+    <ion-item-group>
+      <ion-item color="white">
+        <ion-label color="dark">Countdown</ion-label>
+        <ion-select [(ngModel)]="countdownLength">
+          <ion-option>None</ion-option>
+          <ion-option>3 sec</ion-option>
+          <ion-option>5 sec</ion-option>
+          <ion-option>10 sec</ion-option>
+          <ion-option>15 sec</ion-option>
+          <ion-option>30 sec</ion-option>
+        </ion-select>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Random hold</ion-label>
+        <ion-toggle [(ngModel)]="randomHold"></ion-toggle>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Start LEDs on</ion-label>
+        <ion-select [(ngModel)]="startOn">
+          <ion-option>End of countdown</ion-option>
+          <ion-option>External trigger</ion-option>
+        </ion-select>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Play each rep</ion-label>
+        <ion-select [(ngModel)]="playEachRep">
+          <ion-option selected>1 time</ion-option>
+          <ion-option>2 times</ion-option>
+          <ion-option>3 times</ion-option>
+          <ion-option>4 times</ion-option>
+          <ion-option>5 times</ion-option>
+          <ion-option>6 times</ion-option>
+          <ion-option>7 times</ion-option>
+          <ion-option>8 times</ion-option>
+          <ion-option>9 times</ion-option>
+          <ion-option>10 times</ion-option>
+          <ion-option>11 times</ion-option>
+          <ion-option>12 times</ion-option>
+          <ion-option>13 times</ion-option>
+          <ion-option>14 times</ion-option>
+          <ion-option>15 times</ion-option>
+          <ion-option>16 times</ion-option>
+          <ion-option>17 times</ion-option>
+          <ion-option>18 times</ion-option>
+          <ion-option>19 times</ion-option>
+          <ion-option>20 times</ion-option>
+        </ion-select>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Auto advance to next rep</ion-label>
+        <ion-toggle [(ngModel)]="autoAdvReps"></ion-toggle>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Shuffle reps</ion-label>
+        <ion-toggle [(ngModel)]="shuffleReps"></ion-toggle>
+      </ion-item>
+      <ion-item color="white">
+        <ion-label color="dark">Rest time between reps</ion-label>
+        <ion-input style="margin-left: 30px;" text-right type="text" [(ngModel)]="restTimeString" placeholder="mm:ss format" (change)="restTimeUpdated()"></ion-input>
+      </ion-item>
+    </ion-item-group>
+  </div>
+
+  <div class="sep"></div>
+
+  <ion-list-header color="mediumgray">
+    <strong>REPS</strong>
+  </ion-list-header>
+
+</ion-content>

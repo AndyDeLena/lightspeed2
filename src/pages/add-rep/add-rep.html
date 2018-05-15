@@ -17,7 +17,7 @@
 
   <ion-item color="white" no-lines>
     <ion-label color="dark">Rep Type</ion-label>
-    <ion-select [(ngModel)]="selectedRepType" placeholder="Choose..." (ionChange)="repTypeChange($event)">
+    <ion-select [(ngModel)]="selectedRepType" placeholder="Select..." (ionChange)="repTypeChange($event)">
       <ion-option>Linear Sprint</ion-option>
       <ion-option *ngFor="let r of workout.repTypes">{{r}}</ion-option>
     </ion-select>
@@ -29,14 +29,14 @@
 
   <!-- LINEAR SPRINT -->
   <div *ngIf="selectedRepType == 'Linear Sprint'">
-    <ion-list-header color="darkgray">
-      {{selectedRepType.toUpperCase()}}
+    <ion-list-header color="mediumgray">
+      <strong>{{selectedRepType.toUpperCase()}}</strong>
     </ion-list-header>
 
-    <div class="wrap">
+    <div padding class="wrap">
       <div *ngFor="let color of util.colors" class="color-div">
-        <button ion-button block [style.outline]="outline(color)" color="{{color}}" (click)="selectColor(color)">
-          {{color.toUpperCase()}}
+        <button ion-button block [style.border]="outline(color)" color="{{color}}" (click)="selectColor(color)">
+          <strong>{{color.toUpperCase()}}</strong>
         </button>
       </div>
     </div>
@@ -44,13 +44,13 @@
     <div class="sep"></div>
 
     <ion-item color="white">
-      <ion-label>Distance</ion-label>
-      <ion-select [(ngModel)]="linearSprint.distance" placeholder="Choose...">
+      <ion-label color="dark">Distance</ion-label>
+      <ion-select [(ngModel)]="linearSprint.distance" placeholder="Select...">
         <ion-option *ngFor="let dist of distanceOptions">{{dist}}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item color="white">
-      <ion-label>Speed</ion-label>
+      <ion-label color="dark">Speed</ion-label>
       <ion-input style="margin-left: 11px" text-right type="number" placeholder="Enter..." [(ngModel)]="linearSprint.speed"></ion-input>
       <ion-select [(ngModel)]="linearSprint.speedUnit">
         <ion-option *ngFor="let s of util.speedUnitOptions">{{s}}</ion-option>
@@ -60,8 +60,8 @@
 
   <!-- ALL OTHERS (MULTI-SEGMENT) -->
   <div *ngIf="selectedRepType.length && selectedRepType != 'Linear Sprint' && selectedRepType != 'Create New Type...' ">
-    <ion-list-header color="darkgray">
-      {{selectedRepType.toUpperCase()}}
+    <ion-list-header color="mediumgray">
+      <strong>{{selectedRepType.toUpperCase()}}</strong>
       <button ion-button icon-only item-end clear color="white" (click)="openRepActionSheet()">
         <ion-icon name="more"></ion-icon>
       </button>
@@ -87,7 +87,7 @@
           <img [src]="'assets/imgs/colors/' + seg.color + '.png'">
         </ion-avatar>
         <ion-label>{{seg.distance + " " + seg.direction}} </ion-label>
-        <ion-input [(ngModel)]="seg.speed" *ngIf="indSegSpeeds" text-right item-end no-padding></ion-input>
+        <ion-input [(ngModel)]="seg.speed" *ngIf="indSegSpeeds" text-right item-end no-padding placeholder="Enter..."></ion-input>
         <ion-select [(ngModel)]="seg.speedUnit" *ngIf="indSegSpeeds" item-end no-padding>
           <ion-option *ngFor="let s of util.speedUnitOptions">{{s}}</ion-option>
         </ion-select>
@@ -95,8 +95,8 @@
 
       <ion-item *ngIf="!indSegSpeeds" color="white">
         <ion-label color="dark">Speed </ion-label>
-        <ion-input text-right item-end placeholder="enter..."></ion-input>
-        <ion-select item-end no-padding>
+        <ion-input text-right item-end placeholder="Enter..."></ion-input>
+        <ion-select [(ngModel)]="overallSpeedUnit" item-end no-padding>
           <ion-option *ngFor="let s of util.speedUnitOptions">{{s}}</ion-option>
         </ion-select>
       </ion-item>
@@ -104,5 +104,5 @@
   </div>
 
   <ion-footer>
-    <button ion-button large block>Add to Workout</button>
+    <button ion-button large block (click)="addToWorkout()"><strong>Add to Workout</strong></button>
   </ion-footer>

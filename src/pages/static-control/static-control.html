@@ -1,0 +1,31 @@
+<ion-header>
+    <ion-navbar color="primary">
+      <ion-title>Static Control</ion-title>
+    </ion-navbar>
+  </ion-header>
+  
+  
+  <ion-content>
+  
+    <div class="sep-mini"></div>
+  
+    <div padding class="wrap">
+      <div *ngFor="let color of availableColors" class="color-div">
+        <button [disabled]="colorButtonsInactive" ion-button block [style.border]="selectedColor == color ? '4px solid black' : ''"
+          color="{{color}}" (click)="selectedColor = color">
+          {{color.toUpperCase()}}
+        </button>
+      </div>
+    </div>
+  
+    <div class="sep"></div>
+  
+
+    <div padding class="wrap">
+      <div *ngFor="let light of lights" class="light-div">
+        <button *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)="activateLight(light)">{{light.id}}</button>
+        <button *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)="deactivateLight(light)">{{light.id}}</button>
+      </div>
+    </div>
+  
+  </ion-content>

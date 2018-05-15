@@ -7,6 +7,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { RepModePage } from '../pages/rep-mode/rep-mode';
 import { ManualControlPage } from '../pages/manual-control/manual-control';
 import { HelpPage } from '../pages/help/help';
+import { BluetoothPage } from '../pages/bluetooth/bluetooth';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -26,7 +27,8 @@ import { Insomnia } from '@ionic-native/insomnia';
     TabsPage,
     RepModePage,
     ManualControlPage,
-    HelpPage
+    HelpPage,
+    BluetoothPage
   ],
   imports: [
     BrowserModule,
@@ -39,7 +41,8 @@ import { Insomnia } from '@ionic-native/insomnia';
     TabsPage,
     RepModePage,
     ManualControlPage,
-    HelpPage
+    HelpPage,
+    BluetoothPage
   ],
   providers: [
     StatusBar,

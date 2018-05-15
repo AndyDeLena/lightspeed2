@@ -15,6 +15,8 @@ export class AddRepPage {
 
   indSegSpeeds = false;
 
+  overallSpeedUnit: string = "mph";
+
   ///////////////////
 
   pageTitle: string = "Add a Rep";
@@ -28,7 +30,7 @@ export class AddRepPage {
 
   typeBuild: any = {segments: []};
 
-  linearSprint: any = {distance: "", speed: "", speedUnit: "sec"};
+  linearSprint: any = {distance: "", speed: "", speedUnit: "mph"};
   
   constructor(public viewCtrl: ViewController, public workout: WorkoutProvider, public modalCtrl: ModalController, public util: UtilitiesProvider, public actionCtrl: ActionSheetController, public platform: Platform){
     this.initializeDistances();
@@ -64,7 +66,7 @@ export class AddRepPage {
 
   openRepActionSheet(): void {
     let as = this.actionCtrl.create({
-      title: "Rep Options",
+      title: "Options",
       buttons: [
         {text: "Edit " + this.selectedRepType + " structure",
          icon: !this.platform.is('ios') ? 'build' : null,
@@ -93,4 +95,9 @@ export class AddRepPage {
   removeRepType(): void {
 
   }
+
+  addToWorkout(): void {
+    this.viewCtrl.dismiss();
+  }
+  
 }

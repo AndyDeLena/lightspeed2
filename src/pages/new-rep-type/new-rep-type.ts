@@ -14,7 +14,7 @@ export class NewRepTypePage {
   distanceOptions: Array<string> = [];
   selectedColor: string = 'red';
 
-  name: string = "";
+  name: string = null;
   startAt: string = "";
   segments: Array<any> = [];
 

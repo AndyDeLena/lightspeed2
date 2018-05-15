@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController } from 'ionic-angular';
+import { NavController, Platform, ModalController, ActionSheetController } from 'ionic-angular';
 
 @Component({
   selector: 'page-rep-mode',
@@ -7,49 +7,7 @@ import { NavController, ModalController } from 'ionic-angular';
 })
 export class RepModePage {
 
-  tempRepsList: Array<any> = [
-    {
-      avatarColor: 'red',
-      description: '5-10-5',
-      speed: "4.5 sec",
-      playing: false
-    },
-    {
-      avatarColor: 'rainbow',
-      description: 'Beep Test',
-      speed: "1 min 57 sec",
-      playing: false
-    },
-    {
-      avatarColor: 'rainbow',
-      description: 'Out and Back',
-      speed: "12.5 mph",
-      playing: false
-    }];
-
-    playing: boolean = false;
-
-  /////////////////////////////////
-
-  configButton: string = "SHOW";
-  configHidden: boolean = true;
-  countdownLength: string = "None";
-  randomHold: boolean = false;
-  startOn: string = "End of countdown";
-  playEachRep: string = "1 time";
-  autoAdvReps: boolean = false;
-  restTimeString: string = "";
-
-  constructor(public navCtrl: NavController, public modalCtrl: ModalController) {
-  }
-
-  showHideConfig(): void {
-    this.configHidden = !this.configHidden;
-    if (this.configHidden) {
-      this.configButton = "Show";
-    } else {
-      this.configButton = "Hide";
-    }
+  constructor(public navCtrl: NavController, public platform: Platform, public modalCtrl: ModalController, public actionCtrl: ActionSheetController) {
   }
 
   openRepModal(): void {
@@ -57,8 +15,35 @@ export class RepModePage {
     modal.present();
   }
 
-  togglePlaying(rep): void {
-    rep.playing = !rep.playing;
+  startWorkout(): void {
+    this.navCtrl.push("RepDashboardPage");
+  }
+
+  openActionSheet(): void {
+    let as = this.actionCtrl.create({
+      title: "Options",
+      buttons: [
+        {
+          text: "Save this workout",
+          icon: !this.platform.is('ios') ? 'folder' : null
+        },
+        {
+          text: "Load a saved workout",
+          icon: !this.platform.is('ios') ? 'code-download' : null,
+        },
+        {
+          text: "Delete a saved workout",
+          role: "destructive",
+          icon: !this.platform.is('ios') ? 'trash' : null,
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: !this.platform.is('ios') ? 'close' : null
+        }
+      ]
+    });
+    as.present();
   }
 
 }

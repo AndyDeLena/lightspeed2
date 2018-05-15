@@ -1,0 +1,130 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Play Recorded Pattern</ion-title>
+    <ion-buttons end>
+      <button ion-button clear icon-only color="white" (click)="openActionSheet()">
+        <ion-icon name="more"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="sep"></div>
+
+  <ion-item color="white">
+    <ion-label color="dark">Pattern Name</ion-label>
+    <ion-select text-right placeholder="Select..." [(ngModel)]="patternName" (ionChange)="patternNameUpdate($event)">
+      <ion-option *ngFor="let p of patternKeys">{{p}}</ion-option>
+    </ion-select>
+  </ion-item>
+
+  <div class="sep-mini"></div>
+
+  <div *ngIf="selectedPatternType == 'static'">
+
+    <div class="sep"></div>
+
+    <ion-item color="white">
+      <ion-label color="dark">Delay Type</ion-label>
+      <ion-select [(ngModel)]="delayType" text-right>
+        <ion-option>Constant</ion-option>
+        <ion-option>Variable</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item *ngIf="delayType == 'Constant'" color="white">
+      <ion-label color="dark">Delay Length</ion-label>
+      <ion-input type="number" text-right placeholder="Enter..."></ion-input>
+      <h4 color="dimgray" item-end>sec</h4>
+    </ion-item>
+
+    <ion-item *ngIf="delayType == 'Variable'" color="white">
+      <ion-label color="dark">Min Delay</ion-label>
+      <ion-input type="number" text-right placeholder="Enter..."></ion-input>
+      <h4 color="dimgray" item-end>sec</h4>
+    </ion-item>
+    <ion-item *ngIf="delayType == 'Variable'" color="white">
+      <ion-label color="dark">Max Delay</ion-label>
+      <ion-input type="number" text-right placeholder="Enter..."></ion-input>
+      <h4 color="dimgray" item-end>sec</h4>
+    </ion-item>
+  </div>
+
+  <div *ngIf="selectedPatternType == 'dynamic'">
+
+    <div class="sep"></div>
+
+    <ion-item color="white" no-lines>
+      <ion-label color="dark">Direction Change Delay</ion-label>
+      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="chgDelay" (tap)="chgDelay = null"></ion-input>
+      <p item-end color="dimgray">sec</p>
+    </ion-item>
+
+    <div class="sep"></div>
+
+    <ion-row>
+      <ion-col margin-left>
+        <strong>BACKWARD SPEED</strong>
+      </ion-col>
+      <ion-col margin-left>
+        <strong>FORWARD SPEED</strong>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-row>
+          <ion-item no-lines>
+            <ion-label stacked></ion-label>
+            <ion-input class="white-field" type="number" [(ngModel)]="backwardSpeed" text-right placeholder="Enter..." (tap)="backwardSpeed = null"></ion-input>
+            <ion-select class="white-field" margin-top text-right [(ngModel)]="backwardSpeedUnit">
+              <ion-option *ngFor="let s of speedUnitOptions">{{s}}</ion-option>
+            </ion-select>
+          </ion-item>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <button block clear color="red" ion-button icon-only (click)="decrement('bwd')">
+              <ion-icon name="md-remove"></ion-icon>
+            </button>
+          </ion-col>
+          <ion-col>
+            <button block clear color="primary" ion-button icon-only (click)="increment('bwd')">
+              <ion-icon name="md-add"></ion-icon>
+            </button>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+      <ion-col>
+        <ion-row>
+          <ion-item no-lines>
+            <ion-label stacked></ion-label>
+            <ion-input class="white-field" type="number" [(ngModel)]="forwardSpeed" text-right placeholder="Enter..." (tap)="forwardSpeed = null"></ion-input>
+            <ion-select class="white-field" margin-top text-right [(ngModel)]="forwardSpeedUnit">
+              <ion-option *ngFor="let s of speedUnitOptions">{{s}}</ion-option>
+            </ion-select>
+          </ion-item>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <button block clear color="red" ion-button icon-only (click)="decrement('fwd')">
+              <ion-icon name="md-remove"></ion-icon>
+            </button>
+          </ion-col>
+          <ion-col>
+            <button block clear color="primary" ion-button icon-only (click)="increment('fwd')">
+              <ion-icon name="md-add"></ion-icon>
+            </button>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </div>
+
+  <div class="sep-large"></div>
+
+  <button *ngIf="!playing" ion-button large class="button-80" color="green" (click)="togglePlaying()">Play</button>
+  <button *ngIf="playing" ion-button large class="button-80" color="red" (click)="togglePlaying()">Stop</button>
+
+</ion-content>

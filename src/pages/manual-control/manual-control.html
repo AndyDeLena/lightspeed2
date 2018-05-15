@@ -1,13 +1,11 @@
 <ion-header>
   <ion-navbar color="primary">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
     <ion-title>
-      <img class="logo" src="assets/imgs/header_logo.png" />
+      Manual Control
     </ion-title>
-    <ion-buttons end>
-      <button ion-button clear color="white" icon-only (click)="openBleModal()">
-        <ion-icon name="bluetooth"></ion-icon>
-      </button>
-    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
@@ -21,226 +19,21 @@
 
   <div class="sep-mini"></div>
 
-    <ion-list-header color="darkgray">
-      CONFIGURATION
-      <button ion-button item-end clear color="white" (click)="showHideConfig()">{{configButton}}</button>
+  <ion-list-header color="mediumgray">
+      <strong>CONTROL TYPES</strong>
     </ion-list-header>
-  
-
-  <div [hidden]="configHidden">
-    <ion-item color="white">
-      <ion-label color="dark">System Length</ion-label>
-      <ion-select [(ngModel)]="systemLength" placeholder="Choose..." (ionChange)="updateSystemLength($event)">
-        <ion-option *ngFor="let opt of sysLenOptions">{{opt}}</ion-option>
-      </ion-select>
-    </ion-item>
-    <ion-item color="white">
-      <ion-label color="dark">Number of Sections</ion-label>
-      <ion-select [(ngModel)]="numSections" placeholder="Choose..." (ionChange)="updateNumSections()">
-        <ion-option *ngFor="let sec of numSectionsOptions">{{sec}}</ion-option>
-      </ion-select>
-    </ion-item>
-  </div>
-
-  <div class="sep-mini"></div>
-
-  <ion-item color="white">
-    <ion-label color="dark">MODE</ion-label>
-    <ion-select [(ngModel)]="mode" (ionChange)="modeChange()">
-      <ion-option value="choose">Pick A Light</ion-option>
-      <ion-option value="continuous">Motion Control</ion-option>
-      <ion-option value="record">Record & Play Pattern</ion-option>
-      <ion-option value="random">Random Pattern</ion-option>
-    </ion-select>
-  </ion-item>
-
-  <div class="sep-mini"></div>
-
-  <div class="wrap">
-    <div *ngFor="let color of availableColors" class="color-div">
-      <button [disabled]="colorButtonsInactive" ion-button block [style.outline]="outline(color)" color="{{color}}" (click)="selectColor(color)">
-        {{color.toUpperCase()}}
+  <ion-list>
+    <button ion-item detail-push color="white" (click)="openPage('RecordPatternPage')">
+      <ion-icon item-start color="red" name="recording"></ion-icon>
+      Record/Save a Pattern
+    </button>
+    <button ion-item detail-push color="white" (click)="openPage('PlayPatternPage')">
+      <ion-icon item-start color="green" name="play"></ion-icon>
+      Play a Saved Pattern
+    </button>
+    <button ion-item detail-push color="white" (click)="openPage('RandomPatternPage')">
+        <ion-icon item-start color="primary" name="bulb"></ion-icon>
+        Random Pattern
       </button>
-    </div>
-  </div>
-
-  <div class="sep"></div>
-
-  <!-- CHOOSE MANUALLY -->
-  <div *ngIf="mode == 'choose'" class="wrap">
-    <div *ngFor="let light of lights" class="light-div">
-      <button *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)="activateLight(light)">{{light.id}}</button>
-      <button *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)="deactivateLight(light)">{{light.id}}</button>
-    </div>
-  </div>
-
-  <!-- RECORD & PLAY -->
-  <div *ngIf="mode == 'record'">
-    <ion-segment [(ngModel)]="recordOrPlay" (ionChange)="recordPlayChange()">
-      <ion-segment-button value="record">Record</ion-segment-button>
-      <ion-segment-button value="play">Play</ion-segment-button>
-    </ion-segment>
-
-    <div class="sep-mini"></div>
-
-    <div *ngIf="recordOrPlay == 'record'">
-      <div *ngIf="!recording">
-        <ion-item color="white">
-          <ion-label color="dark">Delay Type</ion-label>
-          <ion-select [(ngModel)]="recordingDelayMode">
-            <ion-option>Constant</ion-option>
-            <ion-option>Variable</ion-option>
-            <ion-option>Custom</ion-option>
-          </ion-select>
-        </ion-item>
-
-        <div *ngIf="recordingDelayMode == 'Constant'">
-          <ion-item color="white">
-            <ion-label color="dark">Delay</ion-label>
-            <ion-input text-right placeholder="Enter..."></ion-input>
-            <p item-end>sec</p>
-          </ion-item>
-        </div>
-
-        <div *ngIf="recordingDelayMode == 'Variable'">
-          <ion-item color="white">
-            <ion-label color="dark">Min Delay</ion-label>
-            <ion-input text-right placeholder="Enter..."></ion-input>
-            <p item-end>sec</p>
-          </ion-item>
-          <ion-item color="white">
-            <ion-label color="dark">Max Delay</ion-label>
-            <ion-input text-right placeholder="Enter..."></ion-input>
-            <p item-end>sec</p>
-          </ion-item>
-        </div>
-
-        <div *ngIf="recordingDelayMode == 'Custom'">
-          <p style="text-align: center">(Delay between lights will track how long you wait to press each button)</p>
-        </div>
-
-        <div class="sep-mini"></div>
-        <button ion-button class="button-80" (click)="startRecording()">Start Recording</button>
-      </div>
-
-      <div *ngIf="recording">
-        <button ion-button class="button-80" color="red" (click)="stopRecording()">Stop Recording</button>
-        <div class="wrap">
-          <div *ngFor="let light of lights" class="light-div">
-            <button *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)="activateLight(light)">{{light.id}}</button>
-            <button *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)="deactivateLight(light)">{{light.id}}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="recordOrPlay == 'play'">
-      <ion-item color="white">
-        <ion-label color="dark">Available Patterns</ion-label>
-        <ion-select [(ngModel)]="patternToPlay" placeholder="Choose...">
-          <ion-option *ngFor="let p of savedPatterns">{{p}}</ion-option>
-        </ion-select>
-      </ion-item>
-
-      <div class="sep-mini"></div>
-      <button ion-button color="green" class="button-80">PLAY</button>
-
-      <div class="sep"></div>
-      <button ion-button outline color="darkgray" style="width: 50%; margin-left: 25%" (click)="playOptions()">Options</button>
-
-
-    </div>
-
-
-  </div>
-
-  <!-- RANDOM PATTERN -->
-  <div *ngIf="mode == 'random'">
-    <ion-item color="white">
-      <ion-label color="dark">Delay Type</ion-label>
-      <ion-select [(ngModel)]="randomDelayMode">
-        <ion-option>Constant</ion-option>
-        <ion-option>Variable</ion-option>
-      </ion-select>
-    </ion-item>
-    <div *ngIf="randomDelayMode == 'Constant'">
-      <ion-item color="white">
-        <ion-label color="dark">Delay</ion-label>
-        <ion-input text-right placeholder="Enter..."></ion-input>
-        <p item-end>sec</p>
-      </ion-item>
-    </div>
-
-    <div *ngIf="randomDelayMode == 'Variable'">
-      <ion-item color="white">
-        <ion-label color="dark">Min Delay</ion-label>
-        <ion-input text-right placeholder="Enter..."></ion-input>
-        <p item-end>sec</p>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Max Delay</ion-label>
-        <ion-input text-right placeholder="Enter..."></ion-input>
-        <p item-end>sec</p>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Duration</ion-label>
-        <ion-input text-right placeholder="Enter..."></ion-input>
-        <p item-end>sec</p>
-      </ion-item>
-    </div>
-
-    <div class="sep-mini"></div>
-
-    <button ion-button color="green" class="button-80">PLAY</button>
-  </div>
-
-  <!-- MOTION CONTROL -->
-  <div *ngIf="mode == 'continuous'">
-    <ion-item color="white">
-      <ion-label color="dark">Fwd Speed</ion-label>
-      <ion-input style="margin-left: 11px" text-right type="number" placeholder="Enter..." [(ngModel)]="forwardSpeed"></ion-input>
-      <ion-select [(ngModel)]="forwardSpeedUnit">
-        <ion-option *ngFor="let v of util.speedUnitOptions">{{v}}</ion-option>
-      </ion-select>
-    </ion-item>
-    <ion-item color="white">
-      <ion-label color="dark">Bwd Speed</ion-label>
-      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="backwardSpeed"></ion-input>
-      <ion-select [(ngModel)]="backwardSpeedUnit">
-        <ion-option *ngFor="let v of util.speedUnitOptions">{{v}}</ion-option>
-      </ion-select>
-    </ion-item>
-    <ion-item color="white">
-      <ion-label color="dark">Direction Chg Delay</ion-label>
-      <ion-input item-end text-right placeholder="(optional)"></ion-input>
-      <p item-end>sec</p>
-    </ion-item>
-
-    <div class="sep"></div>
-
-    <ion-row>
-      <ion-col>
-        <button ion-button block (click)="playSpeed('b')">
-          BACKWARD
-        </button>
-      </ion-col>
-      <ion-col>
-        <button ion-button block (click)="pauseSpeed()">
-          <ion-icon name="pause"></ion-icon>
-        </button>
-      </ion-col>
-      <ion-col>
-        <button ion-button block (click)="playSpeed('f')">
-          FORWARD
-        </button>
-      </ion-col>
-    </ion-row>
-
-    <div class="sep-mini"></div>
-
-    <ion-row>
-      <button ion-button class="button-80" color="danger" (click)="resetSpeed(false)">RESET</button>
-    </ion-row>
-  </div>
-
+  </ion-list>
 </ion-content>

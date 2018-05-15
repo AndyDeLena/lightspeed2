@@ -37,8 +37,8 @@ ion-title img {
 }
 
 ion-input {
-	border: 1px solid dodgerblue;
-	border-radius: 5px;
+	//border: 1px solid dodgerblue;
+	//border-radius: 5px;
 }
 
 .error-card {
@@ -83,8 +83,15 @@ ion-input {
     margin: 50px -5 50px -5px;
 }
 
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
 .pretty-item {
-	border: 1px solid darkgray;
+	border: 1px solid dimgray;
 	border-radius: 5px;
 }
 
@@ -104,4 +111,16 @@ ion-input {
 	margin: 10px 0 0 2%;
 	flex-grow: 1;
 	width: calc(100% * (1/3) - 12px);
+}
+
+.remote-button {
+	width: 100%;
+	background-color: bg-gray;
+}
+
+.light-div {
+	display: inline-block;
+	margin:10px 0 0 2%;
+	flex-grow: 1;
+	width: calc(100% * (1/5) - 12px);
 }

@@ -1,11 +1,14 @@
 <ion-header>
   <ion-navbar color="primary">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
     <ion-title>
-      <img class="logo" src="assets/imgs/header_logo.png" />
+     Reps Mode
     </ion-title>
     <ion-buttons end>
-      <button ion-button clear color="white" icon-only (click)="openBleModal()">
-        <ion-icon name="bluetooth"></ion-icon>
+      <button ion-button clear color="white" icon-only (click)="openActionSheet()">
+        <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
   </ion-navbar>
@@ -14,119 +17,23 @@
 
 <ion-content>
 
-    <div class="sep-mini"></div>
+  <div class="sep-mini"></div>
 
-  <ion-list-header color="darkgray">
-    OPTIONS
-    <button ion-button clear item-right color="white" (click)="showHideConfig()">{{configButton}}</button>
+  <ion-list-header color="mediumgray">
+    <strong>REPS</strong>
+    <button ion-fab mini item-end icon-only color="green" (click)="openRepModal()"><ion-icon name="md-add"></ion-icon></button>
   </ion-list-header>
 
-  <div [hidden]="configHidden">
-    <ion-item-group>
-      <ion-item color="white">
-        <ion-label color="dark">Countdown</ion-label>
-        <ion-select [(ngModel)]="countdownLength">
-          <ion-option>None</ion-option>
-          <ion-option>3 sec</ion-option>
-          <ion-option>5 sec</ion-option>
-          <ion-option>10 sec</ion-option>
-          <ion-option>15 sec</ion-option>
-          <ion-option>30 sec</ion-option>
-        </ion-select>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Random hold</ion-label>
-        <ion-toggle [(ngModel)]="randomHold"></ion-toggle>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Start LEDs on</ion-label>
-        <ion-select [(ngModel)]="startOn">
-          <ion-option>End of countdown</ion-option>
-          <ion-option>External trigger</ion-option>
-        </ion-select>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Play each rep</ion-label>
-        <ion-select [(ngModel)]="playEachRep">
-          <ion-option selected>1 time</ion-option>
-          <ion-option>2 times</ion-option>
-          <ion-option>3 times</ion-option>
-          <ion-option>4 times</ion-option>
-          <ion-option>5 times</ion-option>
-          <ion-option>6 times</ion-option>
-          <ion-option>7 times</ion-option>
-          <ion-option>8 times</ion-option>
-          <ion-option>9 times</ion-option>
-          <ion-option>10 times</ion-option>
-          <ion-option>11 times</ion-option>
-          <ion-option>12 times</ion-option>
-          <ion-option>13 times</ion-option>
-          <ion-option>14 times</ion-option>
-          <ion-option>15 times</ion-option>
-          <ion-option>16 times</ion-option>
-          <ion-option>17 times</ion-option>
-          <ion-option>18 times</ion-option>
-          <ion-option>19 times</ion-option>
-          <ion-option>20 times</ion-option>
-        </ion-select>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Auto advance to next rep</ion-label>
-        <ion-toggle [(ngModel)]="autoAdvReps"></ion-toggle>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Shuffle reps</ion-label>
-        <ion-toggle [(ngModel)]="shuffleReps"></ion-toggle>
-      </ion-item>
-      <ion-item color="white">
-        <ion-label color="dark">Rest time between reps</ion-label>
-        <ion-input style="margin-left: 30px;" text-right type="text" [(ngModel)]="restTimeString" placeholder="mm:ss format" (change)="restTimeUpdated()"></ion-input>
-      </ion-item>
-    </ion-item-group>
+  <div class="sep-large"></div>
 
-    <div class="sep-mini"></div>
+  <h4 style="text-align: center; color: dimgray">
+    (Add some reps to your workout to get started)
+  </h4>
 
-  </div>
-
-  <div class="sep"></div>
-
-  <ion-list-header color="darkgray">
-   REPS
-    <button ion-button icon-left item-end outline color="white" (click)="openRepModal()">
-      <ion-icon name="md-add"></ion-icon>
-      Add
-    </button>
-  </ion-list-header>
-
-  <ion-list>
-    <ion-item-sliding #slide *ngFor="let rep of tempRepsList">
-      <ion-item #item color="white">
-        <ion-avatar item-start>
-          <img [src]="'assets/imgs/colors/' + rep.avatarColor + '.png'">
-        </ion-avatar>
-        <h2 *ngIf="!rep.playing" color="dark">{{rep.description}}</h2>
-        <p  *ngIf="!rep.playing">{{rep.speed}}</p>
-        <h1 *ngIf="rep.playing">0:00.0</h1>
-        <button  *ngIf="!rep.playing"  ion-button margin-right large item-end clear icon-only color="secondary" (click)="togglePlaying(rep)">
-          <ion-icon name="play"></ion-icon>
-        </button>
-        <button *ngIf="rep.playing" ion-button margin-right item-end large clear icon-only color="red" (click)="togglePlaying(rep)">
-          <ion-icon name="square"></ion-icon>
-        </button>
-        <button ion-button margin-left item-end clear icon-only color="dark">
-          <ion-icon name="more"></ion-icon>
-        </button>
-      </ion-item>
-      <ion-item-options side="right">
-          <button ion-button icon-left large color="lightorange" (click)="openRepModal(slide, rep)">
-            <ion-icon name="create"></ion-icon>
-            Edit
-          </button>
-          <button ion-button icon-left large color="danger" (click)="removeRep(rep)">
-            <ion-icon name="trash"></ion-icon>
-            Remove
-          </button>
-        </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
 </ion-content>
+
+<ion-footer>
+  <button ion-button large block color="green" (click)="startWorkout()">
+    <strong>Start</strong>
+  </button>
+</ion-footer>

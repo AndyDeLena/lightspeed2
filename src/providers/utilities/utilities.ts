@@ -5,7 +5,7 @@ export class UtilitiesProvider {
 
   colors: Array<string> = ['red', 'green', 'blue'];
 
-  speedUnitOptions: Array<string> = ['sec', 'mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h'];
+  speedUnitOptions: Array<string> = ['mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h'];
 
   constructor() {
 

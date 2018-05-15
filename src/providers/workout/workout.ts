@@ -29,7 +29,7 @@ export class WorkoutProvider {
             distance: "5 yards",
             color: "red",
             speed: "",
-            speedUnit: "sec"
+            speedUnit: "mph"
           },
           {
             id: 2,
@@ -37,7 +37,7 @@ export class WorkoutProvider {
             distance: "10 yards",
             color: "red",
             speed: "",
-            speedUnit: "sec"
+            speedUnit: "mph"
           },
           {
             id: 3,
@@ -45,7 +45,7 @@ export class WorkoutProvider {
             distance: "5 sec",
             color: "red",
             speed: "",
-            speedUnit: "sec"
+            speedUnit: "mph"
           }]
       }
     }
