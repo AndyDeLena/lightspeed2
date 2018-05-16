@@ -4,12 +4,12 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
+<ion-content no-bounce>
 
   <div class="sep-mini"></div>
 
   <ion-segment [disabled]="recording" [(ngModel)]="staticOrDynamic">
-    <ion-segment-button value="static">Single Nodes</ion-segment-button>
+    <ion-segment-button value="static">Single Light</ion-segment-button>
     <ion-segment-button value="dynamic">Streaming Light</ion-segment-button>
   </ion-segment>
 
@@ -17,21 +17,21 @@
   
     <ion-item color="white">
       <ion-label color="dark">System Length</ion-label>
-      <ion-select [disabled]="recording" [(ngModel)]="systemLength" placeholder="Select..." (ionChange)="updateSystemLength($event)">
-        <ion-option *ngFor="let opt of sysLenOptions">{{opt}}</ion-option>
+      <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.systemLength" placeholder="Select..." (ionChange)="updateSystemLength($event)">
+        <ion-option *ngFor="let opt of dataService.distanceOptions">{{opt}}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item color="white">
       <ion-label color="dark">Number of Sections</ion-label>
-      <ion-select [disabled]="recording" [(ngModel)]="numSections" placeholder="Select..." (ionChange)="fillLights()">
-        <ion-option *ngFor="let sec of numSectionsOptions">{{sec}}</ion-option>
+      <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.numSections" placeholder="Select..." (ionChange)="fillLights()">
+        <ion-option *ngFor="let sec of dataService.numSectionsOptions">{{sec}}</ion-option>
       </ion-select>
     </ion-item>
   
     <div class="sep"></div>
 
 
-  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Single Nodes</strong></button>
+  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Single Light</strong></button>
   <button *ngIf="!recording && staticOrDynamic == 'dynamic'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Streaming Pattern</strong></button>
   <button *ngIf="recording" ion-button class="button-80" color="red" (click)="stopRecording()"><strong>Stop Recording</strong></button>
   
@@ -50,34 +50,33 @@
       </div>
     </div>
 
-    <div *ngIf="staticOrDynamic == 'static'">
-      <div class="wrap" padding>
-        <div *ngFor="let light of lights" class="light-div">
-          <button *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)="activateLight(light)">{{light.id}}</button>
-          <button *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)="deactivateLight(light)">{{light.id}}</button>
-        </div>
-      </div>
-    </div>
-
     <div *ngIf="staticOrDynamic == 'dynamic'">
-      <div class="sep-large"></div>
+      <div class="sep"></div>
       <ion-row>
         <ion-col>
-          <button ion-button large block icon-left>
-            <ion-icon name="arrow-back"></ion-icon> BWD</button>
-        </ion-col>
-        <ion-col>
-          <button ion-button large block color="lightorange">
-            <ion-icon name="pause"></ion-icon>
+          <button ion-button large block icon-left (click)="backward()">
+            <ion-icon name="arrow-back"></ion-icon> 
+            BWD
           </button>
         </ion-col>
         <ion-col>
-          <button ion-button large block icon-right>FWD
+          <button ion-button large block icon-right (click)="forward()">
+            FWD
             <ion-icon name="arrow-forward"></ion-icon>
           </button>
         </ion-col>
       </ion-row>
     </div>
+
+    <div>
+        <div class="wrap" padding>
+          <div *ngFor="let light of lights" class="light-div">
+            <button [disabled]="staticOrDynamic == 'dynamic'" *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)="addToRecord(light)">{{light.id}}</button>
+            <button [disabled]="staticOrDynamic == 'dynamic'" *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)="deactivateInRecord(light)">{{light.id}}</button>
+          </div>
+        </div>
+      </div>
+
   </div>
 
 </ion-content>

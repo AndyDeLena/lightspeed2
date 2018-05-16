@@ -2,27 +2,27 @@
   <ion-navbar color="primary">
     <ion-title>Play Recorded Pattern</ion-title>
     <ion-buttons end>
-      <button ion-button clear icon-only color="white" (click)="openActionSheet()">
+      <button [disabled]="!patternName.length" ion-button clear icon-only color="white" (click)="openActionSheet()">
         <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-<ion-content>
+<ion-content no-bounce>
 
   <div class="sep"></div>
 
   <ion-item color="white">
     <ion-label color="dark">Pattern Name</ion-label>
-    <ion-select text-right placeholder="Select..." [(ngModel)]="patternName" (ionChange)="patternNameUpdate($event)">
-      <ion-option *ngFor="let p of patternKeys">{{p}}</ion-option>
+    <ion-select text-right placeholder="Select..." [(ngModel)]="patternName" (ionChange)="patternNameUpdated($event)">
+      <ion-option *ngFor="let p of savedPatterns">{{p}}</ion-option>
     </ion-select>
   </ion-item>
 
   <div class="sep-mini"></div>
 
-  <div *ngIf="selectedPatternType == 'static'">
+  <div *ngIf="patternType == 'static'">
 
     <div class="sep"></div>
 
@@ -52,7 +52,7 @@
     </ion-item>
   </div>
 
-  <div *ngIf="selectedPatternType == 'dynamic'">
+  <div *ngIf="patternType == 'dynamic'">
 
     <div class="sep"></div>
 
@@ -79,7 +79,7 @@
             <ion-label stacked></ion-label>
             <ion-input class="white-field" type="number" [(ngModel)]="backwardSpeed" text-right placeholder="Enter..." (tap)="backwardSpeed = null"></ion-input>
             <ion-select class="white-field" margin-top text-right [(ngModel)]="backwardSpeedUnit">
-              <ion-option *ngFor="let s of speedUnitOptions">{{s}}</ion-option>
+              <ion-option *ngFor="let s of dataService.speedUnitOptions">{{s}}</ion-option>
             </ion-select>
           </ion-item>
         </ion-row>
@@ -102,7 +102,7 @@
             <ion-label stacked></ion-label>
             <ion-input class="white-field" type="number" [(ngModel)]="forwardSpeed" text-right placeholder="Enter..." (tap)="forwardSpeed = null"></ion-input>
             <ion-select class="white-field" margin-top text-right [(ngModel)]="forwardSpeedUnit">
-              <ion-option *ngFor="let s of speedUnitOptions">{{s}}</ion-option>
+              <ion-option *ngFor="let s of dataService.speedUnitOptions">{{s}}</ion-option>
             </ion-select>
           </ion-item>
         </ion-row>

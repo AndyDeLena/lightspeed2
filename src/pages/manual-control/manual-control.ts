@@ -15,12 +15,6 @@ export class ManualControlPage {
 
   unregisterHwBackButton: any;
 
-  sysLenOptions: Array<string> = [];
-  systemLength: string = "10 yards";
-  numSectionsOptions: Array<number> = [1];
-  numSections: number = 1;
-
-
   constructor(public navCtrl: NavController, public alertCtrl: AlertController, public workout: WorkoutProvider, public util: UtilitiesProvider, public alerts: AlertsProvider,
     public connection: ConnectionProvider, public modalCtrl: ModalController, public insomnia: Insomnia, public platform: Platform) {
 

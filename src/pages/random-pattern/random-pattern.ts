@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
+import { DataProvider } from '../../providers/data/data';
 
 @IonicPage()
 @Component({
@@ -8,11 +9,10 @@ import { UtilitiesProvider } from '../../providers/utilities/utilities';
   templateUrl: 'random-pattern.html',
 })
 export class RandomPatternPage {
-
-  availableColors: Array<string> = ['red', 'green', 'blue'];
+  
+  colors: Array<string> = [];
   selectedColor: string = "red";
-
-
+  
   staticOrDynamic: string = "static";
   
   delayType: string = "Constant";
@@ -21,16 +21,13 @@ export class RandomPatternPage {
   backwardSpeed: number = 0;
   chgDelay: number = 0;
 
-  speedUnitOptions: Array<string> = [];
-
   forwardSpeedUnit: string = "mph";
   backwardSpeedUnit: string = "mph";
 
   playing: boolean = false;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public util: UtilitiesProvider) {
-    this.speedUnitOptions = this.util.speedUnitOptions;
-
+  constructor(public navCtrl: NavController, public dataService: DataProvider, public navParams: NavParams, public util: UtilitiesProvider) {
+    this.colors = this.dataService.colors;
   }
 
   checkSpeedDataTypes(): void {
@@ -79,6 +76,10 @@ export class RandomPatternPage {
 
   togglePlaying(): void {
     this.playing = !this.playing;
+  }
+
+  updateSystemLength(newLength): void {
+    this.dataService.updateSystemLength(newLength);
   }
 
 

@@ -18,8 +18,10 @@ import { WorkoutProvider } from '../providers/workout/workout';
 
 import { IonicStorageModule } from '@ionic/storage';
 
+import { Keyboard } from '@ionic-native/keyboard';
 import { BLE } from '@ionic-native/ble';
 import { Insomnia } from '@ionic-native/insomnia';
+import { DataProvider } from '../providers/data/data';
 
 @NgModule({
   declarations: [
@@ -47,13 +49,15 @@ import { Insomnia } from '@ionic-native/insomnia';
   providers: [
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    Keyboard,
+    { provide: ErrorHandler, useClass: IonicErrorHandler },
     ConnectionProvider,
     AlertsProvider,
     UtilitiesProvider,
     WorkoutProvider,
     BLE,
-    Insomnia
+    Insomnia,
+    DataProvider
   ]
 })
-export class AppModule {}
+export class AppModule { }

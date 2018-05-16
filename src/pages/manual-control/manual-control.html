@@ -9,7 +9,7 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
+<ion-content no-bounce>
 
   <!-- <ion-card class="warning-card" *ngIf="!connection.active">
     <ion-card-content>
@@ -20,20 +20,20 @@
   <div class="sep-mini"></div>
 
   <ion-list-header color="mediumgray">
-      <strong>CONTROL TYPES</strong>
-    </ion-list-header>
+    <strong>CONTROL TYPES</strong>
+  </ion-list-header>
   <ion-list>
+    <button ion-item detail-push color="white" (click)="openPage('RandomPatternPage')">
+      <ion-icon item-start color="primary" name="bulb"></ion-icon>
+      Random Pattern
+    </button>
     <button ion-item detail-push color="white" (click)="openPage('RecordPatternPage')">
       <ion-icon item-start color="red" name="recording"></ion-icon>
-      Record/Save a Pattern
+      Record a Pattern
     </button>
     <button ion-item detail-push color="white" (click)="openPage('PlayPatternPage')">
       <ion-icon item-start color="green" name="play"></ion-icon>
       Play a Saved Pattern
     </button>
-    <button ion-item detail-push color="white" (click)="openPage('RandomPatternPage')">
-        <ion-icon item-start color="primary" name="bulb"></ion-icon>
-        Random Pattern
-      </button>
   </ion-list>
 </ion-content>

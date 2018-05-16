@@ -4,7 +4,7 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>
-     Reps Mode
+      Reps Mode
     </ion-title>
     <ion-buttons end>
       <button ion-button clear color="white" icon-only (click)="openActionSheet()">
@@ -15,25 +15,46 @@
 </ion-header>
 
 
-<ion-content>
+<ion-content no-bounce>
+  <div class="page">
 
-  <div class="sep-mini"></div>
+    <div class="fixed">
 
-  <ion-list-header color="mediumgray">
-    <strong>REPS</strong>
-    <button ion-fab mini item-end icon-only color="green" (click)="openRepModal()"><ion-icon name="md-add"></ion-icon></button>
-  </ion-list-header>
+      <div class="sep-mini"></div>
 
-  <div class="sep-large"></div>
+      <ion-list-header color="mediumgray">
+        <strong>REPS</strong>
+        <button ion-fab mini item-end icon-only color="green" (click)="openRepModal()">
+          <ion-icon name="md-add"></ion-icon>
+        </button>
+      </ion-list-header>
 
-  <h4 style="text-align: center; color: dimgray">
-    (Add some reps to your workout to get started)
-  </h4>
+    </div>
 
+    <div class="scroll">
+      <ion-list no-lines>
+        <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of workout.repsList">
+          <ion-avatar item-start>
+            <img [src]="'assets/imgs/colors/' + rep.data.color + '.png'">
+          </ion-avatar>
+          <ion-label item-start>{{rep.data.caption}}</ion-label>
+          <button ion-button item-start margin-right clear icon-only (click)="editRep(rep)">
+            <ion-icon name="build"></ion-icon>
+          </button>
+          <button ion-button item-end margin-left clear icon-only color="red" (click)="removeRep(rep)">
+            <ion-icon name="trash"></ion-icon>
+          </button>
+        </ion-item>
+      </ion-list>
+
+    </div>
+
+    <div class="feet">
+      <button ion-button large block color="green" (click)="startWorkout()">
+        <strong>Start</strong>
+      </button>
+    </div>
+
+
+  </div>
 </ion-content>
-
-<ion-footer>
-  <button ion-button large block color="green" (click)="startWorkout()">
-    <strong>Start</strong>
-  </button>
-</ion-footer>

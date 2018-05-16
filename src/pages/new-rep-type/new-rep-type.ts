@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { IonicPage, ViewController, NavParams, AlertController } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { WorkoutProvider } from '../../providers/workout/workout';
+import { AlertsProvider } from '../../providers/alerts/alerts';
+import { DataProvider } from '../../providers/data/data';
+
 
 @IonicPage()
 @Component({
@@ -10,20 +13,36 @@ import { WorkoutProvider } from '../../providers/workout/workout';
 })
 export class NewRepTypePage {
 
-  startAtOptions: Array<string> = [];
-  distanceOptions: Array<string> = [];
-  selectedColor: string = 'red';
+  pageTitle: string = "New Rep Type";
+  buttonCaption: string = "Save Rep Type"
 
-  name: string = null;
+  editingName: string = "";
+
+  startAtOptions: Array<string> = [];
+
+  name: string = "";
   startAt: string = "";
   segments: Array<any> = [];
 
-  constructor(public viewCtrl: ViewController, public workout: WorkoutProvider, public alertCtrl: AlertController, public navParams: NavParams, public util: UtilitiesProvider) {
+  constructor(public viewCtrl: ViewController, public alerts: AlertsProvider, public dataService: DataProvider, public workout: WorkoutProvider, public alertCtrl: AlertController, public navParams: NavParams, public util: UtilitiesProvider) {
     this.initializeDistances();
+
+    let name = this.navParams.get('name');
+
+    if (name) {
+      this.pageTitle = "Edit Rep Type";
+      this.buttonCaption = "Update Rep Type";
+
+      this.editingName = name;
+
+      this.name = name;
+      this.startAt = this.dataService.savedData.savedRepTypes[name].startAt;
+      this.segments = this.dataService.savedData.savedRepTypes[name].segments;
+    }
   }
 
   dismiss(): void {
-    this.viewCtrl.dismiss();
+    this.viewCtrl.dismiss({newName: ""});
   }
 
   initializeDistances(): void {
@@ -31,7 +50,6 @@ export class NewRepTypePage {
 
     for (let i = 2.5; i <= 100; i += 2.5) {
       this.startAtOptions.push(i + " yard mark");
-      this.distanceOptions.push(i + " yards");
     }
   }
 
@@ -39,7 +57,7 @@ export class NewRepTypePage {
     this.segments[id - 1].color = color;
   }
 
-  outlineSegColor(id, color): string {
+  segBorder(id, color): string {
     if (this.segments[id - 1].color == color) {
       return '4px solid black';
     } else {
@@ -48,7 +66,7 @@ export class NewRepTypePage {
   }
 
   addSegment(): void {
-    this.segments.push({ id: this.segments.length + 1, direction: "", distance: "", speed: "", speedUnit: "" });
+    this.segments.push({ id: this.segments.length + 1, direction: "", distance: "" });
   }
 
   removeSegment(id): void {
@@ -59,14 +77,72 @@ export class NewRepTypePage {
   }
 
   saveRepType(): void {
-    for (let seg of this.segments) {
-      seg.speed = "";
-      seg.speedUnit = "sec";
+
+    let valid = this.validateType();
+
+    if (valid) {
+      let saveObj = {
+        startAt: this.startAt,
+        segments: this.segments,
+      }
+
+      if (this.pageTitle == "Edit Rep Type") {
+        this.dataService.removeObject('savedRepTypes', this.editingName);
+        this.dataService.saveObject('savedRepTypes', this.name, saveObj);
+        this.viewCtrl.dismiss({ newName: this.name });
+      } else {
+        let typeExists = this.dataService.checkExists('savedRepTypes', this.name);
+
+        if (typeExists) {
+          this.alerts.okAlert("Error", "This name is already taken. Please choose another.");
+        } else {
+          this.dataService.saveObject('savedRepTypes', this.name, saveObj);
+          this.viewCtrl.dismiss({newName: ""});
+        }
+      }
+    }
+  }
+
+  validateType(): boolean {
+    if (!this.name.length) {
+      this.alerts.okAlert('Error', 'Please enter a name.');
+      return false;
+    } else if (!this.startAt.length) {
+      this.alerts.okAlert('Error', 'Please select a starting position.');
+      return false;
+    } else if (!this.segments.length) {
+      this.alerts.okAlert('Error', 'Please add at least one segment.');
+      return false;
     }
 
-    this.workout.addRepTemplate(this.name, this.startAt, this.segments);
-    
-    this.viewCtrl.dismiss();
+    let yardMark = this.util.stringToNum(this.startAt);
+
+    for (let s of this.segments) {
+      let id = this.segments.indexOf(s) + 1;
+      if (!s.color) {
+        this.alerts.okAlert('Error', 'Please choose a color for Segment ' + id);
+        return false;
+      } else if (!s.direction) {
+        this.alerts.okAlert('Error', 'Please choose a direction for Segment ' + id);
+        return false;
+      } else if (!s.distance) {
+        this.alerts.okAlert('Error', 'Please choose a distance for Segment ' + id);
+        return false;
+      }
+
+      if (s.direction == 'Forward') {
+        yardMark += this.util.stringToNum(s.distance);
+      } else {
+        yardMark -= this.util.stringToNum(s.distance);
+      }
+
+      if (yardMark < 0) {
+        this.alerts.okAlert('Error', 'Segment ' + id + ' extends past the beginning of the system.');
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }

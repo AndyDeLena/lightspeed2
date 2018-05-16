@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, Platform, NavController, NavParams, ActionSheetController } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { AlertsProvider } from '../../providers/alerts/alerts';
+import { DataProvider } from '../../providers/data/data';
 
 @IonicPage()
 @Component({
@@ -10,11 +11,9 @@ import { AlertsProvider } from '../../providers/alerts/alerts';
 })
 export class PlayPatternPage {
 
+  savedPatterns: Array<string> = [];
   patternName: string = "";
-  selectedPatternType: string = "";
-  patternKeys: Array<string> = [];
-
-  patterns: any = {"Example 1": {type: "static"}, "Example 2": {type: "dynamic"}};
+  patternType: string = "";
 
   delayType: string = "Constant";
 
@@ -22,16 +21,13 @@ export class PlayPatternPage {
   backwardSpeed: number = 0;
   chgDelay: number = 0;
 
-  speedUnitOptions: Array<string> = [];
-
   forwardSpeedUnit: string = "mph";
   backwardSpeedUnit: string = "mph";
 
   playing: boolean = false;
 
-  constructor(public navCtrl: NavController, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
-    this.speedUnitOptions = this.util.speedUnitOptions;
-    this.patternKeys = Object.keys(this.patterns);
+  constructor(public navCtrl: NavController, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
+    this.savedPatterns = this.dataService.savedData.contents.savedPatterns;
   }
 
   checkSpeedDataTypes(): void {
@@ -43,6 +39,14 @@ export class PlayPatternPage {
     }
     if (typeof (this.chgDelay) == 'string') {
       this.chgDelay = parseFloat(this.chgDelay);
+    }
+  }
+
+  patternNameUpdated(newName): void {
+    if (newName.length) {
+      this.patternType = this.dataService.savedData.savedPatterns[this.patternName].type;
+    } else {
+      this.patternType = "";
     }
   }
 
@@ -82,22 +86,14 @@ export class PlayPatternPage {
     this.playing = !this.playing;
   }
 
-  patternNameUpdate(event): void {
-    this.selectedPatternType = this.patterns[event].type;
-  }
-
   removePattern(): void {
     let self = this;
-    this.alerts.okCancelAlert('Remove Type', 'Are you sure you want to remove ' + self.patternName + '?','Yes').then(res => {
-      if(res == 'OK'){
-        delete self.patterns[self.patternName];
-        
-        this.patternKeys = Object.keys(this.patterns);
-        if(!this.patternKeys.length){
-          this.selectedPatternType = "";
-        } else {
-          this.selectedPatternType = this.patternKeys[0];
-        }
+    this.alerts.okCancelAlert('Remove Type', 'Are you sure you want to remove ' + self.patternName + '?', 'Yes').then(res => {
+      if (res == 'OK') {
+        this.dataService.removeObject('savedPatterns', this.patternName);
+        this.patternName = "";
+        this.patternType = "";
+        this.savedPatterns = this.dataService.savedData.contents.savedPatterns;
       }
     });
   }
@@ -106,13 +102,17 @@ export class PlayPatternPage {
     let as = this.actionCtrl.create({
       title: "Options",
       buttons: [
-        {text: "Remove " + this.patternName + " from saved patterns",
-         role: "destructive",
-         icon: !this.platform.is('ios') ? 'trash' : null,
-         handler: ()=>{this.removePattern()}},
-        {text: 'Cancel',
-         role: 'cancel',
-         icon: !this.platform.is('ios') ? 'close' : null}
+        {
+          text: "Remove " + this.patternName + " from saved patterns",
+          role: "destructive",
+          icon: !this.platform.is('ios') ? 'trash' : null,
+          handler: () => { this.removePattern() }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          icon: !this.platform.is('ios') ? 'close' : null
+        }
       ]
     });
     as.present();

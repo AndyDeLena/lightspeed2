@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, ModalController, NavController, NavParams } from 'ionic-angular';
+import { WorkoutProvider } from '../../providers/workout/workout';
 
 @IonicPage()
 @Component({
@@ -11,7 +12,7 @@ export class RepDashboardPage {
   configButton: string = "Hide";
   configHidden: boolean = false;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(public navCtrl: NavController, public modalCtrl: ModalController, public workout: WorkoutProvider, public navParams: NavParams) {
   }
 
   showHideConfig(): void {
@@ -23,6 +24,12 @@ export class RepDashboardPage {
       this.configHidden = false;
     }
   }
+
+  editRep(rep): void {
+    let modal = this.modalCtrl.create("AddRepPage", { editing: rep });
+    modal.present();
+  }
+
 
   
 
