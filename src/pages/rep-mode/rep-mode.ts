@@ -3,6 +3,7 @@ import { NavController, Platform, AlertController, ModalController, ActionSheetC
 import { WorkoutProvider } from '../../providers/workout/workout';
 import { DataProvider } from '../../providers/data/data';
 import { AlertsProvider } from '../../providers/alerts/alerts';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
 @Component({
   selector: 'page-rep-mode',
@@ -10,7 +11,7 @@ import { AlertsProvider } from '../../providers/alerts/alerts';
 })
 export class RepModePage {
 
-  constructor(public navCtrl: NavController, public alerts: AlertsProvider, public dataService: DataProvider, public alertCtrl: AlertController, public workout: WorkoutProvider, public platform: Platform, public modalCtrl: ModalController, public actionCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public connection: ConnectionProvider, public alerts: AlertsProvider, public dataService: DataProvider, public alertCtrl: AlertController, public workout: WorkoutProvider, public platform: Platform, public modalCtrl: ModalController, public actionCtrl: ActionSheetController) {
   }
 
   openRepModal(): void {
@@ -140,7 +141,7 @@ export class RepModePage {
       text: 'Delete',
       role: 'destructive',
       handler: data => {
-        this.dataService.removeObject('savedWorkouts', name);
+        this.dataService.removeObject('savedWorkouts', data);
       }
     });
     alert.present();

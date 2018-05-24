@@ -16,13 +16,13 @@
   <div class="sep"></div>
   
     <ion-item color="white">
-      <ion-label color="dark">System Length</ion-label>
+      <ion-label color="dark">System length</ion-label>
       <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.systemLength" placeholder="Select..." (ionChange)="updateSystemLength($event)">
         <ion-option *ngFor="let opt of dataService.distanceOptions">{{opt}}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item color="white">
-      <ion-label color="dark">Number of Sections</ion-label>
+      <ion-label color="dark">Number of sections</ion-label>
       <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.numSections" placeholder="Select..." (ionChange)="fillLights()">
         <ion-option *ngFor="let sec of dataService.numSectionsOptions">{{sec}}</ion-option>
       </ion-select>
@@ -44,7 +44,7 @@
     <div padding class="wrap">
       <div *ngFor="let color of availableColors" class="color-div">
         <button [disabled]="colorButtonsInactive" ion-button block [style.border]="selectedColor == color ? '4px solid black' : ''"
-          color="{{color}}" (click)="selectedColor = color">
+          color="{{color}}" (click)="colorChange(color)">
           <strong>{{color.toUpperCase()}}</strong>
         </button>
       </div>

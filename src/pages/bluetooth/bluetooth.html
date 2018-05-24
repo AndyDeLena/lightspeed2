@@ -1,18 +1,70 @@
 <ion-header>
     <ion-navbar color="primary">
-      <button ion-button menuToggle>
-        <ion-icon name="menu"></ion-icon>
-      </button>
-      <ion-title>
-        Bluetooth Connect
-      </ion-title>
+        <ion-title>
+            Bluetooth Connect
+        </ion-title>
+        <ion-buttons end>
+            <button ion-button clear color="white" (click)="done()">
+                Done
+            </button>
+        </ion-buttons>
     </ion-navbar>
-  </ion-header>
+</ion-header>
 
-<ion-content padding>
-  <p color="dimgray">bluetooth connection stuff will go here</p>
+<ion-content no-bounce>
+    <!-- Cards to be shown at top of page if any BLE errors -->
+    <ion-card class="error-card" *ngIf="bleNotSupported">
+        <ion-card-content>
+            Bluetooth LE is not supported on your device.
+        </ion-card-content>
+    </ion-card>
+
+    <ion-card class="warning-card" *ngIf="bleNotEnabled">
+        <ion-card-content>
+            Bluetooth is not enabled. Please enable it to scan for available systems.
+        </ion-card-content>
+    </ion-card>
+
+    <div class="sep-mini"></div>
+
+    <ion-list-header color="mediumgray">
+        <strong>AVAILABLE CONTROLLERS</strong>
+    </ion-list-header>
+
+    <!-- Card and re-scan button to be shown at top of page if no controllers found -->
+    <ion-card class="warning-card" *ngIf="gooseEgg">
+        <ion-card-content>
+            No LightSpeed systems found. Please make sure no one else is currently connected to your system.
+        </ion-card-content>
+    </ion-card>
+
+    <div class="sep-mini"></div>
+
+    <ion-list>
+        <ion-item color="light" *ngFor="let box of connection.availableBoxes">
+            <ion-label>{{box.name}}</ion-label>
+            <button *ngIf="!box.connected" ion-button item-right style="height: 40px; width: 100px" (click)="connect(box.name, box.id)">
+                <strong>Connect</strong>
+            </button>
+            <button *ngIf="box.connected" ion-button item-right style="height: 40px; width: 100px" color="danger" (click)="disconnect(box.id)">
+                <strong>Disconnect</strong>
+            </button>
+        </ion-item>
+    </ion-list>
+
 </ion-content>
 
 <ion-footer>
-  <button ion-button block large (click)="done()"><strong>Done</strong></button>
+    <button [disabled]="scanning || bleNotEnabled || bleNotSupported" ion-button block large (click)="scan()">
+        <div *ngIf="scanning" class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+        </div>
+        <div *ngIf="!scanning">
+            <strong>{{buttonCaption}}</strong>
+        </div>
+    </button>
 </ion-footer>

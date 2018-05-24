@@ -11,29 +11,32 @@
 
 <ion-content no-bounce>
 
-  <!-- <ion-card class="warning-card" *ngIf="!connection.active">
+  <ion-card class="warning-card" *ngIf="!connection.activeBoxes.length">
     <ion-card-content>
       Bluetooth is not connected
     </ion-card-content>
-  </ion-card>-->
+  </ion-card>
 
   <div class="sep-mini"></div>
 
   <ion-list-header color="mediumgray">
     <strong>CONTROL TYPES</strong>
   </ion-list-header>
+  
+  <div class="sep-mini"></div>
+
   <ion-list>
     <button ion-item detail-push color="white" (click)="openPage('RandomPatternPage')">
       <ion-icon item-start color="primary" name="bulb"></ion-icon>
-      Random Pattern
+      Random pattern
     </button>
     <button ion-item detail-push color="white" (click)="openPage('RecordPatternPage')">
       <ion-icon item-start color="red" name="recording"></ion-icon>
-      Record a Pattern
+      Record a pattern
     </button>
     <button ion-item detail-push color="white" (click)="openPage('PlayPatternPage')">
       <ion-icon item-start color="green" name="play"></ion-icon>
-      Play a Saved Pattern
+      Play a saved pattern
     </button>
   </ion-list>
 </ion-content>

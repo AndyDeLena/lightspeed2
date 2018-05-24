@@ -36,13 +36,13 @@ export class NewRepTypePage {
       this.editingName = name;
 
       this.name = name;
-      this.startAt = this.dataService.savedData.savedRepTypes[name].startAt;
+      this.startAt = this.dataService.savedData.savedRepTypes[name].segments[0].startAt;
       this.segments = this.dataService.savedData.savedRepTypes[name].segments;
     }
   }
 
   dismiss(): void {
-    this.viewCtrl.dismiss({newName: ""});
+    this.viewCtrl.dismiss({ newName: "" });
   }
 
   initializeDistances(): void {
@@ -82,7 +82,6 @@ export class NewRepTypePage {
 
     if (valid) {
       let saveObj = {
-        startAt: this.startAt,
         segments: this.segments,
       }
 
@@ -97,7 +96,7 @@ export class NewRepTypePage {
           this.alerts.okAlert("Error", "This name is already taken. Please choose another.");
         } else {
           this.dataService.saveObject('savedRepTypes', this.name, saveObj);
-          this.viewCtrl.dismiss({newName: ""});
+          this.viewCtrl.dismiss({ newName: "" });
         }
       }
     }
@@ -129,6 +128,8 @@ export class NewRepTypePage {
         this.alerts.okAlert('Error', 'Please choose a distance for Segment ' + id);
         return false;
       }
+
+      s.startAt = yardMark + " yards";
 
       if (s.direction == 'Forward') {
         yardMark += this.util.stringToNum(s.distance);

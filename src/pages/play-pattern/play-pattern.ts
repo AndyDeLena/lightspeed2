@@ -3,6 +3,7 @@ import { IonicPage, Platform, NavController, NavParams, ActionSheetController } 
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { DataProvider } from '../../providers/data/data';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
 @IonicPage()
 @Component({
@@ -16,69 +17,32 @@ export class PlayPatternPage {
   patternType: string = "";
 
   delayType: string = "Constant";
+  constDelay: number = null;
+  minDelay: number = null;
+  maxDelay: number = null;
 
-  forwardSpeed: number = 0;
-  backwardSpeed: number = 0;
-  chgDelay: number = 0;
+  forwardSpeed: number = null;
+  backwardSpeed: number = null;
+  chgDelay: number = null;
 
   forwardSpeedUnit: string = "mph";
   backwardSpeedUnit: string = "mph";
 
   playing: boolean = false;
+  playTimeout: any = null;
 
-  constructor(public navCtrl: NavController, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public connection: ConnectionProvider, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
     this.savedPatterns = this.dataService.savedData.contents.savedPatterns;
   }
 
-  checkSpeedDataTypes(): void {
-    if (typeof (this.forwardSpeed) == 'string') {
-      this.forwardSpeed = parseFloat(this.forwardSpeed);
-    }
-    if (typeof (this.backwardSpeed) == 'string') {
-      this.backwardSpeed = parseFloat(this.backwardSpeed);
-    }
-    if (typeof (this.chgDelay) == 'string') {
-      this.chgDelay = parseFloat(this.chgDelay);
-    }
-  }
+  public convertToNumber(event): number { return +event; }
+
 
   patternNameUpdated(newName): void {
     if (newName.length) {
       this.patternType = this.dataService.savedData.savedPatterns[this.patternName].type;
     } else {
       this.patternType = "";
-    }
-  }
-
-  increment(direction): void {
-    this.checkSpeedDataTypes();
-
-    if (direction == 'fwd') {
-      this.forwardSpeed = parseFloat((this.forwardSpeed += 0.1).toFixed(1));
-    } else if (direction == 'bwd') {
-      this.backwardSpeed = parseFloat((this.backwardSpeed += 0.1).toFixed(1));
-    } else {
-      this.chgDelay = parseFloat((this.chgDelay += 0.1).toFixed(1));
-    }
-  }
-
-  decrement(direction): void {
-    if (direction == 'fwd') {
-      this.forwardSpeed = parseFloat((this.forwardSpeed -= 0.1).toFixed(1));
-    } else if (direction == 'bwd') {
-      this.backwardSpeed = parseFloat((this.backwardSpeed -= 0.1).toFixed(1));
-    } else {
-      this.chgDelay = parseFloat((this.chgDelay -= 0.1).toFixed(1));
-    }
-
-    if (this.forwardSpeed < 0) {
-      this.forwardSpeed = 0;
-    }
-    if (this.backwardSpeed < 0) {
-      this.backwardSpeed = 0;
-    }
-    if (this.chgDelay < 0) {
-      this.chgDelay = 0;
     }
   }
 
@@ -118,7 +82,134 @@ export class PlayPatternPage {
     as.present();
   }
 
+  play(): void {
+    this.playing = true;
 
+    if (this.patternType == "static") {
+      this.playStatic();
+    } else {
+      this.playDynamic();
+    }
+  }
 
+  playStatic(): void {
+    let valid = this.validateStatic();
+    if (!valid) {
+      this.playing = false;
+      return;
+    }
 
+    let record = this.dataService.savedData.savedPatterns[this.patternName].record;
+    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * 2;
+    let numSec = this.dataService.savedData.savedPatterns[this.patternName].numSections;
+
+    let interval = totalNodes / numSec;
+
+    let cmd;
+    let wait;
+    let i = 0;
+
+    let internalCallback = () => {
+      cmd = this.util.buildStaticCommands(record[i].color, record[i].id, interval);
+      console.log(cmd);
+      i++;
+
+      this.connection.write(cmd).catch(err => {
+        this.stop();
+        this.alerts.okAlert("Error", "Error communicating with LED controller. Please try again.");
+        return;
+      });
+
+      if (i == record.length) {
+        this.stop();
+        return;
+      }
+
+      wait = this.delayType == "Constant" ? this.constDelay * 1000 : (Math.random() * (this.minDelay - this.maxDelay) + this.maxDelay) * 1000;
+      this.playTimeout = setTimeout(() => {
+        internalCallback();
+      }, wait);
+    }
+    internalCallback();
+  }
+
+  playDynamic(): void {
+    let valid = this.validateDynamic();
+    if (!valid) {
+      this.playing = false;
+      return;
+    }
+
+    let record = this.dataService.savedData.savedPatterns[this.patternName].record;
+    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * 2;
+    let numSec = this.dataService.savedData.savedPatterns[this.patternName].numSections;
+
+    let interval = totalNodes / numSec;
+
+    let chg = this.chgDelay ? this.chgDelay * 1000 : 0;
+
+    let totalMs = 0;
+
+    for(let rec of record){
+      if(rec.direction == "Forward"){
+        rec.speed = this.forwardSpeed;
+        rec.speedUnit = this.forwardSpeedUnit;
+      } else {
+        rec.speed = this.backwardSpeed;
+        rec.speedUnit = this.backwardSpeedUnit;
+      }
+      rec.msDelay = this.util.speedToMsDelay(rec.speed, rec.speedUnit);
+      totalMs += rec.msDelay * rec.distance;
+    }
+
+    let cmds = this.util.buildRecordedDynamic(record, interval, chg);
+
+    console.log(cmds);
+
+    this.connection.play(cmds).catch(err => {
+      this.alerts.okAlert("Error", "An error occurred while starting the pattern. Please try again.");
+      this.stop();
+      return;
+    });
+
+    this.playTimeout = setTimeout(() => {
+      this.stop();
+    }, totalMs);
+
+  }
+
+  validateStatic(): boolean {
+    if (this.delayType == "Constant" && !this.constDelay) {
+      this.alerts.okAlert("Form Invalid", "Please enter a value for delay length.");
+      return false;
+    } else if (this.delayType == "Variable" && !this.minDelay) {
+      this.alerts.okAlert("Form Invalid", "Please enter a value for min delay.");
+      return false;
+    } else if (this.delayType == "Variable" && !this.maxDelay) {
+      this.alerts.okAlert("Form Invalid", "Please enter a value for max delay.");
+      return false;
+    } else if (this.minDelay > this.maxDelay) {
+      this.alerts.okAlert("Form Invalid", "Max delay must be greater than min delay.");
+      return false;
+    }
+    return true;
+  }
+
+  validateDynamic(): boolean {
+    if (!this.forwardSpeed) {
+      this.alerts.okAlert("Form Invalid", "Please enter a value for forward speed.");
+      return false;
+    } else if (!this.backwardSpeed) {
+      this.alerts.okAlert("Form Invalid", "Please enter a value for backward speed.");
+      return false;
+    }
+
+    return true;
+  }
+
+  stop(): void {
+    this.connection.stopPattern();
+    clearTimeout(this.playTimeout);
+    this.playing = false;
+  }
 }

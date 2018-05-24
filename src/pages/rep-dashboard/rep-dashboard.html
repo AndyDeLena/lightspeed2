@@ -9,6 +9,12 @@
 
   <div class="page">
 
+    <ion-card class="warning-card" *ngIf="!connection.activeBoxes.length">
+      <ion-card-content>
+        Bluetooth is not connected
+      </ion-card-content>
+    </ion-card>
+
     <div [ngClass]="configHidden ? {'fixed': false, 'fixed-small': true} : {'fixed': true, 'fixed-small': false} ">
 
       <ion-list-header color="mediumgray">
@@ -75,7 +81,12 @@
           </ion-item>
           <ion-item color="white">
             <ion-label color="dark">Rest time between reps</ion-label>
-            <ion-input style="margin-left: 30px;" text-right type="text" [(ngModel)]="restTimeString" placeholder="mm:ss format" (change)="restTimeUpdated()"></ion-input>
+            <ion-select [(ngModel)]="restMins">
+              <ion-option *ngFor="let m of mins">{{m}}</ion-option>
+            </ion-select>
+            <ion-select [(ngModel)]="restSecs">
+              <ion-option *ngFor="let s of secs">{{s}}</ion-option>
+            </ion-select>
           </ion-item>
         </ion-item-group>
       </div>
@@ -93,14 +104,18 @@
       <ion-list no-lines>
         <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of workout.repsList">
           <ion-avatar item-start>
-            <img [src]="'assets/imgs/colors/' + rep.data.color + '.png'">
+            <img [src]="'assets/imgs/colors/' + rep.data.avatarColor + '.png'">
           </ion-avatar>
-          <ion-label item-start>{{rep.data.caption}}</ion-label>
-          <button ion-button margin-left item-start clear icon-only color="dimgray" (click)="editRep(rep)">
+          <h1 style="font-family: DroidSansMono;">{{rep.display}}</h1>
+          <p>{{rep.data.caption}}</p>
+          <button ion-button margin-left item-end clear icon-only color="dimgray" (click)="editRep(rep)">
             <ion-icon name="build"></ion-icon>
           </button>
-          <button ion-button margin-left large item-end clear icon-only color="green" (click)="play(rep)">
+          <button *ngIf="!rep.playing" ion-button margin-left large item-end clear icon-only color="green" (click)="play(rep)">
             <ion-icon name="play"></ion-icon>
+          </button>
+          <button *ngIf="rep.playing" ion-button margin-left large item-end clear icon-only color="red" (click)="stop(rep)">
+            <ion-icon name="square"></ion-icon>
           </button>
         </ion-item>
       </ion-list>

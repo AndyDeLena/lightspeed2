@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.domtech.lightspeedsprint" version="5.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>LS Sprint</name>
+    <name>LightSpeed</name>
     <description>Redefine Your Limits</description>
     <author email="andrewdelena@domtechsports.com" href="http://www.domtechsports.com/">DomTech Sports</author>
     <content src="index.html" />
@@ -77,6 +77,7 @@
         <splash height="480" src="resources/ios/splash/Default~iphone.png" width="320" />
         <splash height="2732" src="resources/ios/splash/Default@2x~universal~anyany.png" width="2732" />
     </platform>
+    <allow-navigation href="http://192.168.1.104:8100" />
     <engine name="ios" spec="4.5.4" />
     <plugin name="cordova-plugin-ble-central" spec="^1.1.8">
         <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Communication with LED controller" />
@@ -89,4 +90,8 @@
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
     <plugin name="cordova-sqlite-storage" spec="^2.3.1" />
+    <plugin name="cordova-plugin-bluetooth-status" spec="^1.0.4" />
+    <plugin name="cordova-plugin-media" spec="^5.0.2">
+        <variable name="KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE" value="NO" />
+    </plugin>
 </widget>

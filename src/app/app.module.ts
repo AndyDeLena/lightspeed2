@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { TabsPage } from '../pages/tabs/tabs';
 import { RepModePage } from '../pages/rep-mode/rep-mode';
 import { ManualControlPage } from '../pages/manual-control/manual-control';
 import { HelpPage } from '../pages/help/help';
@@ -15,18 +14,19 @@ import { ConnectionProvider } from '../providers/connection/connection';
 import { AlertsProvider } from '../providers/alerts/alerts';
 import { UtilitiesProvider } from '../providers/utilities/utilities';
 import { WorkoutProvider } from '../providers/workout/workout';
+import { DataProvider } from '../providers/data/data';
 
 import { IonicStorageModule } from '@ionic/storage';
 
 import { Keyboard } from '@ionic-native/keyboard';
 import { BLE } from '@ionic-native/ble';
 import { Insomnia } from '@ionic-native/insomnia';
-import { DataProvider } from '../providers/data/data';
+import { Media } from '@ionic-native/media';
+
 
 @NgModule({
   declarations: [
     MyApp,
-    TabsPage,
     RepModePage,
     ManualControlPage,
     HelpPage,
@@ -40,7 +40,6 @@ import { DataProvider } from '../providers/data/data';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    TabsPage,
     RepModePage,
     ManualControlPage,
     HelpPage,
@@ -50,14 +49,15 @@ import { DataProvider } from '../providers/data/data';
     StatusBar,
     SplashScreen,
     Keyboard,
-    { provide: ErrorHandler, useClass: IonicErrorHandler },
     ConnectionProvider,
     AlertsProvider,
     UtilitiesProvider,
     WorkoutProvider,
     BLE,
     Insomnia,
-    DataProvider
+    DataProvider,
+    Media,
+    { provide: ErrorHandler, useClass: IonicErrorHandler },
   ]
 })
 export class AppModule { }

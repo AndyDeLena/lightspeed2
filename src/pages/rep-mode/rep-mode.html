@@ -35,10 +35,10 @@
       <ion-list no-lines>
         <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of workout.repsList">
           <ion-avatar item-start>
-            <img [src]="'assets/imgs/colors/' + rep.data.color + '.png'">
+            <img [src]="'assets/imgs/colors/' + rep.data.avatarColor + '.png'">
           </ion-avatar>
           <ion-label item-start>{{rep.data.caption}}</ion-label>
-          <button ion-button item-start margin-right clear icon-only (click)="editRep(rep)">
+          <button ion-button item-end margin-right clear icon-only (click)="editRep(rep)">
             <ion-icon name="build"></ion-icon>
           </button>
           <button ion-button item-end margin-left clear icon-only color="red" (click)="removeRep(rep)">

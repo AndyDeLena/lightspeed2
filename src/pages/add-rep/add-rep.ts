@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { IonicPage, Platform, NavController, NavParams, ViewController, ActionSheetController, AlertController, ModalController } from 'ionic-angular';
+import { IonicPage, Platform, NavParams, ViewController, ActionSheetController, ModalController } from 'ionic-angular';
 import { WorkoutProvider } from '../../providers/workout/workout';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
-import { ConnectionProvider } from '../../providers/connection/connection';
 import { DataProvider } from '../../providers/data/data';
 
 @IonicPage()
@@ -20,23 +19,13 @@ export class AddRepPage {
 
   selectedRepType: string = "";
 
-  linearSprint: any = {
-    color: "",
-    distance: "",
-    speed: null,
-    speedUnit: "sec",
-    msDelay: 0,
-    caption: "",
-  };
-
-  multiSegRep: any = {
-    color: "",
+  newRep: any = {
+    avatarColor: "",
     individualSpeeds: false,
-    startAt: '',
     overallSpeed: null,
     speedUnit: 'sec',
     caption: '',
-    segments: []              //color, diretion, distance, speed, speedUnit
+    segments: []              //color, direction, startAt, distance, speed, speedUnit, msDelay
   };
 
   constructor(public viewCtrl: ViewController, public navParams: NavParams, public alerts: AlertsProvider, public dataService: DataProvider, public workout: WorkoutProvider, public modalCtrl: ModalController, public util: UtilitiesProvider, public actionCtrl: ActionSheetController, public platform: Platform) {
@@ -50,14 +39,8 @@ export class AddRepPage {
 
       this.selectedRepType = editing.type;
 
-      if (editing.type == "Linear Sprint") {
-        this.linearSprint = editing.data;
-      } else {
-        this.multiSegRep = editing.data;
-        if(this.multiSegRep.overallSpeed == 'various'){
-          this.multiSegRep.overallSpeed = null;
-        }
-      }
+      this.newRep = editing.data;
+
     }
   }
 
@@ -66,26 +49,29 @@ export class AddRepPage {
   }
 
   repTypeChange(type): void {
-    if (type == "Create New Type...") {
+    if (type == "Create new type...") {
       this.createNewRepType();
-    } else if (type == "Linear Sprint") {
-      //nothing
     } else {
       //multi-seg rep
-      this.blankMultiTypeRep(type);
+      this.blankRep(type);
     }
   }
 
-  blankMultiTypeRep(type): void {
-    let savedType = this.dataService.savedData.savedRepTypes[type];
-    if (savedType) {
-      this.multiSegRep.startAt = savedType.startAt;
-      this.multiSegRep.segments = savedType.segments;
+  blankRep(type): void {
+    if (type == "Linear sprint") {
+      this.newRep.segments = [{color: "red", direction: "Forward", startAt: "0 yards", distance: null, speed: null, speedUnit: this.newRep.speedUnit, msDelay: null}];
+    } else {
+      let savedType = this.dataService.savedData.savedRepTypes[type];
 
-      //add fields that aren't stored with rep template
-      for (let s of this.multiSegRep.segments) {
-        s.speed = null
-        s.speedUnit = this.multiSegRep.overallSpeedUnit;
+      if (savedType) {
+        this.newRep.segments = savedType.segments;
+
+        //add fields that aren't stored with rep template
+        for (let s of this.newRep.segments) {
+          s.speed = null;
+          s.speedUnit = this.newRep.overallSpeedUnit;
+          s.msDelay = null;
+        }
       }
     }
   }
@@ -133,7 +119,7 @@ export class AddRepPage {
 
   removeRepType(): void {
     let typeToDelete = this.selectedRepType;
-    let alert = this.alerts.okCancelAlert('Delete', 'Are you sure you want to delete this rep type?', 'Yes').then(res => {
+    this.alerts.okCancelAlert('Delete', 'Are you sure you want to delete this rep type?', 'Yes').then(res => {
       if (res == "OK") {
         this.selectedRepType = "";
         this.dataService.removeObject('savedRepTypes', typeToDelete);
@@ -142,8 +128,8 @@ export class AddRepPage {
   }
 
   indvSpeedToggle(): void {
-    this.multiSegRep.overallSpeed = null;
-    for (let s of this.multiSegRep.segments) {
+    this.newRep.overallSpeed = null;
+    for (let s of this.newRep.segments) {
       s.speed = null;
     }
   }
@@ -156,103 +142,126 @@ export class AddRepPage {
     } else {
       this.normalizeSpeed();
 
-      if (this.selectedRepType == "Create New Type...") {
+      this.setAvatarColor();
+
+      if (this.selectedRepType == "Create new type...") {
         //nothing
-      } else if (this.selectedRepType == "Linear Sprint") {
-        this.linearSprint.caption = this.linearSprint.distance + ", " + this.linearSprint.speed + " " + this.linearSprint.speedUnit;
-
-        if (this.pageTitle == "Edit Rep") {
-          this.workout.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.linearSprint });
-        } else {
-          this.workout.repsList.push({ type: this.selectedRepType, data: this.linearSprint });
-        }
+      } else if (this.selectedRepType == "Linear sprint") {
+        this.newRep.caption = this.newRep.segments[0].distance + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
       } else {
-        this.findMultiSegColor();
+        this.newRep.caption = this.selectedRepType + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
+      }
 
-        this.multiSegRep.caption = this.selectedRepType + ", " + this.multiSegRep.overallSpeed + " " + this.multiSegRep.speedUnit;
-
-        if (this.pageTitle == "Edit Rep") {
-          this.workout.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.multiSegRep });
-        } else {
-          this.workout.repsList.push({ type: this.selectedRepType, data: this.multiSegRep });
-        }
+      if (this.pageTitle == "Edit Rep") {
+        this.workout.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.newRep });
+      } else {
+        this.workout.repsList.push({ type: this.selectedRepType, data: this.newRep });
       }
 
       this.viewCtrl.dismiss();
     }
+
   }
 
   validateRep(): boolean {
-    if (!this.selectedRepType.length || this.selectedRepType == "Create New Type...") {
+    if (!this.selectedRepType.length || this.selectedRepType == "Create new type...") {
       this.alerts.okAlert('Error', 'Please choose a rep type.');
       return false;
     }
 
-    if (this.selectedRepType == 'Linear Sprint') {
-      if (!this.linearSprint.color.length) {
+    if (this.selectedRepType == 'Linear sprint') {
+      if (!this.newRep.segments[0].color.length) {
         this.alerts.okAlert('Error', 'Please select a color.');
         return false;
-      } else if (!this.linearSprint.distance.length) {
+      } else if (!this.newRep.segments[0].distance.length) {
         this.alerts.okAlert('Error', 'Please select a distance.');
         return false;
-      } else if (!this.linearSprint.speed) {
+      } else if (!this.newRep.overallSpeed) {
         this.alerts.okAlert('Error', 'Please enter a speed.');
         return false;
       }
-    }
 
-    return true;
+      return true;
+
+    } else {
+      if (!this.newRep.overallSpeed) {
+        let valid = true;
+        for (let s of this.newRep.segments) {
+          if (!s.speed) {
+            valid = false;
+            break;
+          }
+        }
+        if (!valid) {
+          this.alerts.okAlert('Error', 'Please enter a speed.');
+        }
+        return valid;
+
+      } else {
+        return true;
+      }
+
+    }
   }
 
   normalizeSpeed(): void {
-    if (this.selectedRepType == "Linear Sprint") {
-      this.linearSprint.msDelay = this.util.speedToMsDelay(this.linearSprint.speed, this.linearSprint.speedUnit, this.linearSprint.distance);
+    if (this.selectedRepType == "Linear sprint") {
+      let sprintSeg = this.newRep.segments[0];
+      sprintSeg.speed = this.newRep.overallSpeed;
+      sprintSeg.speedUnit = this.newRep.speedUnit;
+      sprintSeg.msDelay = this.util.speedToMsDelay(sprintSeg.speed, sprintSeg.speedUnit, sprintSeg.distance);
     } else {
-      if (this.multiSegRep.overallSpeed) {
-        if (this.multiSegRep.speedUnit == 'sec') {
+      if (this.newRep.overallSpeed) {
+        if (this.newRep.speedUnit == 'sec') {
           let totalDistance = 0;
-          for (let s of this.multiSegRep.segments) {
+          for (let s of this.newRep.segments) {
             totalDistance += this.util.stringToNum(s.distance);
           }
-          for (let t of this.multiSegRep.segments) {
+          for (let t of this.newRep.segments) {
             let segDist = this.util.stringToNum(t.distance);
-            let segSecs = (segDist / totalDistance) * this.multiSegRep.speed;
-            t.msDelay = this.util.speedToMsDelay(segSecs, this.multiSegRep.speedUnit, t.distance);
+            let segSecs = (segDist / totalDistance) * parseFloat(this.newRep.overallSpeed);
+            t.msDelay = this.util.speedToMsDelay(segSecs, this.newRep.speedUnit, t.distance);
           }
         } else {
-          for (let s of this.multiSegRep.segments) {
-            s.msDelay = this.util.speedToMsDelay(this.multiSegRep.speed, this.multiSegRep.speedUnit);
+          for (let s of this.newRep.segments) {
+            s.msDelay = this.util.speedToMsDelay(this.newRep.overallSpeed, this.newRep.speedUnit);
           }
         }
       } else {
-        if (this.multiSegRep.speedUnit == 'sec') {
-          for (let t of this.multiSegRep.segments) {
-            this.multiSegRep.overallSpeed += parseFloat(t.speed);
+        if (this.newRep.speedUnit == 'sec') {
+          for (let t of this.newRep.segments) {
+            this.newRep.overallSpeed += parseFloat(t.speed);
           }
         } else {
-          this.multiSegRep.overallSpeed = "various";
+          this.newRep.overallSpeed = "various";
         }
 
-        for (let s of this.multiSegRep.segments) {
-          s.msDelay = this.util.speedToMsDelay(s.speed, this.multiSegRep.speedUnit, s.distance);
+        for (let s of this.newRep.segments) {
+          s.msDelay = this.util.speedToMsDelay(s.speed, this.newRep.speedUnit, s.distance);
         }
       }
     }
   }
 
-  findMultiSegColor(): void {
-    let rainbow = false;
-    for (let i = 1; i < this.multiSegRep.segments.length; i++) {
-      if (this.multiSegRep.segments[i].color != this.multiSegRep.segments[i - 1].color) {
-        rainbow = true;
-        break;
+  setAvatarColor(): void {
+    if (this.selectedRepType == "Linear sprint") {
+      this.newRep.avatarColor = this.newRep.segments[0].color;
+    } else {
+      let rainbow = false;
+
+      for (let i = 1; i < this.newRep.segments.length; i++) {
+        if (this.newRep.segments[i].color != this.newRep.segments[i - 1].color) {
+          rainbow = true;
+          break;
+        }
+      }
+      if (rainbow) {
+        this.newRep.avatarColor = 'rainbow';
+      } else {
+        this.newRep.avatarColor = this.newRep.segments[0].color;
       }
     }
-    if (rainbow) {
-      this.multiSegRep.color = 'rainbow';
-    } else {
-      this.multiSegRep.color = this.multiSegRep.segments[0].color;
-    }
+
   }
 
 }

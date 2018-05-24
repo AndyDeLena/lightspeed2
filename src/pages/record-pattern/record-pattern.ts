@@ -14,16 +14,15 @@ export class RecordPatternPage {
   staticOrDynamic: string = "static";
   recordingDelayMode: string = "Constant";
   recording: boolean = false;
-  savedPatterns: Array<string> = [];
-  patternToPlay: string = "";
-
+  
   availableColors: Array<string> = ['red', 'green', 'blue'];
   selectedColor: string = "red";
 
-  playing: boolean = false;
-
   lights: Array<{ id: number, active: boolean, color: string }> = [];
   cId: number = 0;
+
+  lastStartAt: number = 0;
+  currentDirection: string = "Forward";
 
   record: Array<any> = [];
 
@@ -33,13 +32,21 @@ export class RecordPatternPage {
     this.fillLights();
   }
 
-  ngOnChanges() {
-    console.log("something changed");
+  ionViewDidLoad() {
+    this.dataService.updateSystemLength(this.dataService.savedData.systemLength);
   }
 
   updateSystemLength(newLength): void {
     this.dataService.updateSystemLength(newLength);
     this.fillLights();
+  }
+
+  fillLights(): void {
+    this.lights = [];
+    let buttons = (this.util.stringToNum(this.dataService.savedData.systemLength) * 2) / this.dataService.savedData.numSections;  //2 LEDs per yard
+    for (let i = 1; i <= buttons; i++) {
+      this.lights.push({ id: i, active: false, color: 'dark' });
+    }
   }
 
   on(): void {
@@ -69,6 +76,34 @@ export class RecordPatternPage {
     console.log(this.record);
   }
 
+  newSegment(): any {
+    if (this.record.length) {
+      let dist = Math.abs(this.cId - this.lastStartAt) + 1;
+      this.record[this.record.length - 1].distance = dist;
+    }
+    this.lastStartAt = this.cId;
+
+    let newSeg = {
+      color: this.selectedColor,
+      direction: this.currentDirection,
+      startAt: this.cId,
+      distance: "0 yards",
+      speed: "0",
+      speedUnit: "mph"
+    }
+
+    this.record.push(newSeg);
+  }
+
+  colorChange(color): void {
+    this.selectedColor = color;
+    if(this.recording && this.staticOrDynamic == 'dynamic'){
+      if(this.cId != this.lastStartAt){
+        this.newSegment();
+      }
+    }
+  }
+
   forward(): void {
     clearInterval(this.dynamicRecordInterval);
 
@@ -76,8 +111,11 @@ export class RecordPatternPage {
       this.cId = 0;
     }
 
+    this.currentDirection = "Forward";
+
+    this.newSegment();
+
     this.on();
-    this.record.push({ id: this.cId, color: this.selectedColor });
 
     this.dynamicRecordInterval = setInterval(() => {
       this.off();
@@ -87,8 +125,6 @@ export class RecordPatternPage {
         this.on();
       } else {
         this.on();
-        this.record.push({ id: this.cId, color: this.selectedColor });
-        console.log(this.record);
       }
     }, 1000);
   }
@@ -100,8 +136,11 @@ export class RecordPatternPage {
       this.cId = this.lights.length - 1;
     }
 
+    this.currentDirection = "Backward";
+    
+    this.newSegment();
+
     this.on();
-    this.record.push({ id: this.cId, color: this.selectedColor });
 
     this.dynamicRecordInterval = setInterval(() => {
       this.off();
@@ -111,8 +150,6 @@ export class RecordPatternPage {
         this.on();
       } else {
         this.on();
-        this.record.push({ id: this.cId, color: this.selectedColor });
-        console.log(this.record);
       }
     }, 1000);
   }
@@ -125,6 +162,13 @@ export class RecordPatternPage {
 
   stopRecording(): void {
     this.recording = false;
+
+    if (this.staticOrDynamic == 'dynamic' && this.record.length) {
+      let dist = Math.abs(this.cId - this.lastStartAt) + 1;
+      this.record[this.record.length - 1].distance = dist;
+    }
+
+    console.log(this.record);
 
     clearInterval(this.dynamicRecordInterval);
     this.off();
@@ -150,51 +194,5 @@ export class RecordPatternPage {
       prompt.present();
     }
   }
-
-  playOptions(): void {
-    if (!this.patternToPlay.length) {
-      this.alerts.okAlert("Select a Pattern", "Please select a saved pattern above in order to see options.");
-    } else {
-
-      let prompt = this.alertCtrl.create({
-        title: 'Options',
-        subTitle: "Would you like to delete or rename this pattern?",
-        buttons: [{
-          text: "Delete"
-        }, {
-          text: "Rename"
-        }, {
-          text: "Cancel"
-        }]
-      });
-      prompt.present();
-    }
-  }
-
-  fillLights(): void {
-    this.lights = [];
-    let buttons = (this.util.stringToNum(this.dataService.savedData.systemLength) * 2) / this.dataService.savedData.numSections;  //2 LEDs per yard
-    for (let i = 1; i <= buttons; i++) {
-      this.lights.push({ id: i, active: false, color: 'dark' });
-    }
-  }
-
-  activateLight(light): void {
-    for (let l of this.lights) {
-      this.deactivateLight(l);
-    }
-    light.active = true;
-    light.color = this.selectedColor;
-  }
-
-  deactivateLight(light): void {
-    light.active = false;
-    light.color = "dark";
-  }
-
-  play(): void {
-    this.playing = !this.playing;
-  }
-
 
 }
