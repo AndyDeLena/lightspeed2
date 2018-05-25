@@ -14,7 +14,7 @@ export class RecordPatternPage {
   staticOrDynamic: string = "static";
   recordingDelayMode: string = "Constant";
   recording: boolean = false;
-  
+
   availableColors: Array<string> = ['red', 'green', 'blue'];
   selectedColor: string = "red";
 
@@ -97,8 +97,8 @@ export class RecordPatternPage {
 
   colorChange(color): void {
     this.selectedColor = color;
-    if(this.recording && this.staticOrDynamic == 'dynamic'){
-      if(this.cId != this.lastStartAt){
+    if (this.recording && this.staticOrDynamic == 'dynamic') {
+      if (this.cId != this.lastStartAt) {
         this.newSegment();
       }
     }
@@ -137,7 +137,7 @@ export class RecordPatternPage {
     }
 
     this.currentDirection = "Backward";
-    
+
     this.newSegment();
 
     this.on();
@@ -173,26 +173,36 @@ export class RecordPatternPage {
     clearInterval(this.dynamicRecordInterval);
     this.off();
 
-    if (this.record.length) {
-      let prompt = this.alertCtrl.create({
-        title: 'Save Pattern',
-        message: 'What name would you like to save this pattern under?',
-        inputs: [{
-          name: 'saveName',
-          placeholder: 'Name...'
-        }],
-        buttons: [{
-          text: 'Cancel',
-        }, {
-          text: 'Save',
-          handler: data => {
-            let saveObj = { type: this.staticOrDynamic, systemLength: this.dataService.savedData.systemLength, numSections: this.dataService.savedData.numSections, record: this.record };
-            this.dataService.saveObject('savedPatterns', data.saveName, saveObj);
-          }
-        }]
-      });
-      prompt.present();
+    let internal = () => {
+      if (this.record.length) {
+        let prompt = this.alertCtrl.create({
+          title: 'Save Pattern',
+          message: 'What name would you like to save this pattern under?',
+          inputs: [{
+            name: 'saveName',
+            placeholder: 'Name...'
+          }],
+          buttons: [{
+            text: 'Cancel',
+          }, {
+            text: 'Save',
+            handler: data => {
+              let exists = this.dataService.checkExists('savedPatterns', data.saveName);
+              if (!exists) {
+                let saveObj = { type: this.staticOrDynamic, systemLength: this.dataService.savedData.systemLength, numSections: this.dataService.savedData.numSections, record: this.record };
+                this.dataService.saveObject('savedPatterns', data.saveName, saveObj);
+              } else {
+                this.alerts.okAlert("Naming Conflict", "A saved pattern with this name already exists. Please enter another.").then(() => {
+                  internal();
+                });
+              }
+            }
+          }]
+        });
+        prompt.present();
+      }
     }
+    internal();
   }
 
 }

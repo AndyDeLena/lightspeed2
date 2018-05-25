@@ -343,6 +343,10 @@ export class RepDashboardPage {
     this.navCtrl.pop();
   }
 
+  noBlePopup(): void {
+    this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
+  }
+
 
 
 

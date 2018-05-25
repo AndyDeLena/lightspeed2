@@ -5,36 +5,34 @@ page-rep-dashboard {
     }
 
     .page {
+        display: flex;
+        flex-direction: column;
         height: 100%;
+        width: 100%;
         overflow: hidden;
     }
 
     .fixed {
+        flex: 0;
         width: 100%;
-        height: 70%;
-        overflow: hidden;
     }
 
     .fixed-small {
         width: 100%;
-        height: 20%;
+        height: $headings-line-height * 2;
         overflow: hidden;
     }
 
     .scroll {
-        width: 100%;
-        height: calc(100% - 70%);
-        overflow-y: scroll;
-        overflow-x: hidden;
-        white-space: nowrap;
+       flex: 1;
+       overflow-y: scroll;
     }
 
     .scroll-large {
         width: 100%;
-        height: calc(100% - 20%);
+        height: -webkit-calc(100% - ($headings-line-height * 2));
         overflow-y: scroll;
         overflow-x: hidden;
         white-space: nowrap; 
     }
-
 }

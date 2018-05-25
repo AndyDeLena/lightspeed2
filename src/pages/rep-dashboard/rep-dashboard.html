@@ -1,21 +1,17 @@
 <ion-header>
   <ion-navbar color="primary">
     <ion-title>Rep Dashboard</ion-title>
+    <ion-buttons end>
+        <button *ngIf="!connection.activeBoxes.length" ion-button clear color="yellow" icon-only (click)="noBlePopup()"><ion-icon name="warning"></ion-icon></button>
+      </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-
 <ion-content no-bounce>
-
+ 
   <div class="page">
 
-    <ion-card class="warning-card" *ngIf="!connection.activeBoxes.length">
-      <ion-card-content>
-        Bluetooth is not connected
-      </ion-card-content>
-    </ion-card>
-
-    <div [ngClass]="configHidden ? {'fixed': false, 'fixed-small': true} : {'fixed': true, 'fixed-small': false} ">
+    <div class="fixed" [ngStyle]="{'height': configHidden ? 2.4 : 9.6}">
 
       <ion-list-header color="mediumgray">
         <strong>OPTIONS</strong>
@@ -23,6 +19,7 @@
       </ion-list-header>
 
       <div *ngIf="!configHidden">
+
         <ion-item-group>
           <ion-item color="white">
             <ion-label color="dark">Countdown</ion-label>
@@ -99,8 +96,7 @@
 
     </div>
 
-    <div [ngClass]="configHidden ? {'scroll': false, 'scroll-large': true} : {'scroll': true, 'scroll-large': false} ">
-
+    <div class="scroll">
       <ion-list no-lines>
         <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of workout.repsList">
           <ion-avatar item-start>
@@ -119,8 +115,7 @@
           </button>
         </ion-item>
       </ion-list>
-
-    </div>
+      </div>
 
   </div>
 </ion-content>

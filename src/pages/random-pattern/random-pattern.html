@@ -1,6 +1,9 @@
 <ion-header>
   <ion-navbar color="primary">
     <ion-title>Random Pattern</ion-title>
+    <ion-buttons end>
+        <button *ngIf="!connection.activeBoxes.length" ion-button clear color="yellow" icon-only (click)="noBlePopup()"><ion-icon name="warning"></ion-icon></button>
+      </ion-buttons>
   </ion-navbar>
 </ion-header>
 
@@ -60,18 +63,18 @@
     <ion-item *ngIf="delayType == 'Constant'" color="white">
       <ion-label color="dark">Delay length</ion-label>
       <ion-input type="number" text-right placeholder="Enter..." [ngModel]="constDelay" (ngModelChange)="constDelay = convertToNumber($event)" (tap)="constDelay = null"></ion-input>
-      <h4 color="dimgray" item-end>sec</h4>
+      <p item-end style="margin-bottom: 8px">sec</p>
     </ion-item>
 
     <ion-item *ngIf="delayType == 'Variable'" color="white">
       <ion-label color="dark">Min delay</ion-label>
       <ion-input type="number" text-right placeholder="Enter..." [ngModel]="minDelay" (ngModelChange)="minDelay = convertToNumber($event)" (tap)="minDelay = null"></ion-input>
-      <h4 color="dimgray" item-end>sec</h4>
+      <p item-end style="margin-bottom: 8px">sec</p>
     </ion-item>
     <ion-item *ngIf="delayType == 'Variable'" color="white">
       <ion-label color="dark">Max delay</ion-label>
       <ion-input type="number" text-right placeholder="Enter..." [ngModel]="maxDelay" (ngModelChange)="maxDelay = convertToNumber($event)" (tap)="maxDelay = null"></ion-input>
-      <h4 color="dimgray" item-end>sec</h4>
+      <p item-end style="margin-bottom: 8px">sec</p>
     </ion-item>
 
     <div class="sep"></div>
@@ -83,7 +86,7 @@
     <ion-item color="white" no-lines>
       <ion-label color="dark">Direction change delay</ion-label>
       <ion-input text-right type="number" placeholder="Enter..." [ngModel]="chgDelay" (ngModelChange)="chgDelay = convertToNumber($event)" (tap)="chgDelay = null"></ion-input>
-      <p item-end color="dimgray">sec</p>
+      <p item-end style="margin-bottom: 8px">sec</p>
     </ion-item>
 
     <div class="sep"></div>

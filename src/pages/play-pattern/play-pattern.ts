@@ -150,8 +150,8 @@ export class PlayPatternPage {
 
     let totalMs = 0;
 
-    for(let rec of record){
-      if(rec.direction == "Forward"){
+    for (let rec of record) {
+      if (rec.direction == "Forward") {
         rec.speed = this.forwardSpeed;
         rec.speedUnit = this.forwardSpeedUnit;
       } else {
@@ -191,7 +191,11 @@ export class PlayPatternPage {
     } else if (this.minDelay > this.maxDelay) {
       this.alerts.okAlert("Form Invalid", "Max delay must be greater than min delay.");
       return false;
+    } else if (this.minDelay < 0.5 || this.maxDelay < 0.5 || this.constDelay < 0.5) {
+      this.alerts.okAlert("Form Invalid", "Minimum delay length is 0.5 seconds.");
+      return false;
     }
+
     return true;
   }
 
@@ -212,4 +216,9 @@ export class PlayPatternPage {
     clearTimeout(this.playTimeout);
     this.playing = false;
   }
+
+  noBlePopup(): void {
+    this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
+  }
+
 }

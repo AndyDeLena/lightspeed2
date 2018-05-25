@@ -45,13 +45,13 @@
 
     <ion-item color="white">
       <ion-label color="dark">Distance</ion-label>
-      <ion-select [(ngModel)]="newRep.segments[0].distance" placeholder="Select...">
+      <ion-select [(ngModel)]="newRep.segments[0].distance" placeholder="Select..." (tap)="newRep.segments[0].distance = null">
         <ion-option *ngFor="let dist of dataService.distanceOptions">{{dist}}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item color="white">
       <ion-label color="dark">Speed</ion-label>
-      <ion-input style="margin-left: 11px" text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed"></ion-input>
+      <ion-input style="margin-left: 11px" text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed" (tap)="newRep.overallSpeed = null"></ion-input>
       <ion-select [(ngModel)]="newRep.speedUnit">
         <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
       </ion-select>
@@ -85,14 +85,14 @@
           <img [src]="'assets/imgs/colors/' + seg.color + '.png'">
         </ion-avatar>
         <ion-label>{{seg.distance + " " + seg.direction}} </ion-label>
-        <ion-input [(ngModel)]="seg.speed" *ngIf="newRep.individualSpeeds" type="number" text-right item-end no-padding placeholder="Enter..."></ion-input>
-        <p *ngIf="newRep.individualSpeeds" item-end color="dimgray">{{newRep.speedUnit}}</p>
+        <ion-input [(ngModel)]="seg.speed" *ngIf="newRep.individualSpeeds" type="number" text-right item-end no-padding placeholder="Enter..." (tap)="seg.speeds = null"></ion-input>
+        <p *ngIf="newRep.individualSpeeds" item-end style="margin-bottom: 8px">{{newRep.speedUnit}}</p>
       </ion-item>
     </ion-list>
 
     <ion-item *ngIf="!newRep.individualSpeeds" color="white">
       <ion-label color="dark">Speed </ion-label>
-      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed"></ion-input>
+      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed" (tap)="newRep.overallSpeed = null"></ion-input>
       <ion-select text-right [(ngModel)]="newRep.speedUnit">
         <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
       </ion-select>

@@ -173,7 +173,7 @@ export class AddRepPage {
       if (!this.newRep.segments[0].color.length) {
         this.alerts.okAlert('Error', 'Please select a color.');
         return false;
-      } else if (!this.newRep.segments[0].distance.length) {
+      } else if (!this.newRep.segments[0].distance) {
         this.alerts.okAlert('Error', 'Please select a distance.');
         return false;
       } else if (!this.newRep.overallSpeed) {
