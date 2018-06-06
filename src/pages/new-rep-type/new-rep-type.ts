@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, ViewController, NavParams, AlertController } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
-import { WorkoutProvider } from '../../providers/workout/workout';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { DataProvider } from '../../providers/data/data';
 
@@ -24,7 +23,7 @@ export class NewRepTypePage {
   startAt: string = "";
   segments: Array<any> = [];
 
-  constructor(public viewCtrl: ViewController, public alerts: AlertsProvider, public dataService: DataProvider, public workout: WorkoutProvider, public alertCtrl: AlertController, public navParams: NavParams, public util: UtilitiesProvider) {
+  constructor(public viewCtrl: ViewController, public alerts: AlertsProvider, public dataService: DataProvider, public alertCtrl: AlertController, public navParams: NavParams, public util: UtilitiesProvider) {
     this.initializeDistances();
 
     let name = this.navParams.get('name');
@@ -66,7 +65,7 @@ export class NewRepTypePage {
   }
 
   addSegment(): void {
-    this.segments.push({ id: this.segments.length + 1, direction: "", distance: "" });
+    this.segments.push({ id: this.segments.length + 1, color: "green", direction: "", distance: "" });
   }
 
   removeSegment(id): void {

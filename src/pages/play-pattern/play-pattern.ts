@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { IonicPage, Platform, NavController, NavParams, ActionSheetController } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { IonicPage, Navbar, NavController, NavParams, ActionSheetController, Platform } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { DataProvider } from '../../providers/data/data';
 import { ConnectionProvider } from '../../providers/connection/connection';
+import { Insomnia } from '@ionic-native/insomnia';
 
 @IonicPage()
 @Component({
@@ -11,6 +12,9 @@ import { ConnectionProvider } from '../../providers/connection/connection';
   templateUrl: 'play-pattern.html',
 })
 export class PlayPatternPage {
+  @ViewChild(Navbar) navBar: Navbar;
+
+  unregisterHwBackButton: any;
 
   savedPatterns: Array<string> = [];
   patternName: string = "";
@@ -31,8 +35,44 @@ export class PlayPatternPage {
   playing: boolean = false;
   playTimeout: any = null;
 
-  constructor(public navCtrl: NavController, public connection: ConnectionProvider, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public insomnia: Insomnia, public connection: ConnectionProvider, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
     this.savedPatterns = this.dataService.savedData.contents.savedPatterns;
+  }
+
+  ionViewDidLoad() {
+    if (this.platform.is('ios')) {
+      this.iosBackButtonAction();
+    } else {
+      this.androidHwBackButtonAction();
+    }
+
+    this.insomnia.keepAwake();
+  }
+
+  ionViewWillLeave() {
+    this.insomnia.allowSleepAgain();
+    
+    // Unregister the custom back button action for this page
+    this.unregisterHwBackButton && this.unregisterHwBackButton();
+  }
+
+  iosBackButtonAction(): void {
+    //custom back button logic for this page b/c user might want to save splits
+    this.navBar.backButtonClick = () => {
+      this.done();
+    }
+  }
+
+  androidHwBackButtonAction(): void {
+    this.unregisterHwBackButton = this.platform.registerBackButtonAction(() => {
+      this.done();
+    });
+  }
+
+
+  done(): void {
+    this.stop();
+    this.navCtrl.pop();
   }
 
   public convertToNumber(event): number { return +event; }
@@ -98,9 +138,9 @@ export class PlayPatternPage {
       this.playing = false;
       return;
     }
-
+    
     let record = this.dataService.savedData.savedPatterns[this.patternName].record;
-    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * 2;
+    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * this.dataService.savedData.nodesPerYard;
     let numSec = this.dataService.savedData.savedPatterns[this.patternName].numSections;
 
     let interval = totalNodes / numSec;
@@ -110,7 +150,7 @@ export class PlayPatternPage {
     let i = 0;
 
     let internalCallback = () => {
-      cmd = this.util.buildStaticCommands(record[i].color, record[i].id, interval);
+      cmd = this.util.buildStaticCommands(record[i].color, record[i].id, interval, totalNodes);
       console.log(cmd);
       i++;
 
@@ -141,7 +181,7 @@ export class PlayPatternPage {
     }
 
     let record = this.dataService.savedData.savedPatterns[this.patternName].record;
-    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * 2;
+    let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * this.dataService.savedData.nodesPerYard;
     let numSec = this.dataService.savedData.savedPatterns[this.patternName].numSections;
 
     let interval = totalNodes / numSec;
@@ -188,10 +228,13 @@ export class PlayPatternPage {
     } else if (this.delayType == "Variable" && !this.maxDelay) {
       this.alerts.okAlert("Form Invalid", "Please enter a value for max delay.");
       return false;
-    } else if (this.minDelay > this.maxDelay) {
+    } else if (this.delayType == "Variable" && this.minDelay > this.maxDelay) {
       this.alerts.okAlert("Form Invalid", "Max delay must be greater than min delay.");
       return false;
-    } else if (this.minDelay < 0.5 || this.maxDelay < 0.5 || this.constDelay < 0.5) {
+    } else if (this.delayType == "Variable" && (this.minDelay < 0.5 || this.maxDelay < 0.5)) {
+      this.alerts.okAlert("Form Invalid", "Minimum delay length is 0.5 seconds.");
+      return false;
+    } else if (this.delayType == 'Constant' && this.constDelay < 0.5) {
       this.alerts.okAlert("Form Invalid", "Minimum delay length is 0.5 seconds.");
       return false;
     }
@@ -222,3 +265,4 @@ export class PlayPatternPage {
   }
 
 }
+ 

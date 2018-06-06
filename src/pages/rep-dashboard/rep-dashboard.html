@@ -98,7 +98,7 @@
 
     <div class="scroll">
       <ion-list no-lines>
-        <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of workout.repsList">
+        <ion-item style="border-bottom: 1px solid lightgray" color="white" *ngFor="let rep of dataService.repsList">
           <ion-avatar item-start>
             <img [src]="'assets/imgs/colors/' + rep.data.avatarColor + '.png'">
           </ion-avatar>

@@ -4,8 +4,7 @@ import { BLE } from '@ionic-native/ble';
 import { Platform, ModalController } from 'ionic-angular';
 import { AlertsProvider } from '../alerts/alerts';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
-import { WorkoutProvider } from '../../providers/workout/workout';
-import { PACKAGE_ROOT_URL } from '@angular/core/src/application_tokens';
+import { DataProvider } from '../../providers/data/data';
 
 @Injectable()
 export class ConnectionProvider {
@@ -18,15 +17,15 @@ export class ConnectionProvider {
   subRetries: number = 0;
 
   uuids = {
-    service: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
-    rx: "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
-    tx: "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+    service: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E",
+    tx: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
+    rx: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E",
   }
 
   currentRx: Observable<any>;
   rxObserver: any;
 
-  constructor(public ble: BLE, public modalCtrl: ModalController, public platform: Platform, public alerts: AlertsProvider, public util: UtilitiesProvider, public workout: WorkoutProvider) {
+  constructor(public ble: BLE, public modalCtrl: ModalController, public dataService: DataProvider, public platform: Platform, public alerts: AlertsProvider, public util: UtilitiesProvider) {
 
     this.zone = new NgZone({ enableLongStackTrace: false });
 
@@ -69,9 +68,9 @@ export class ConnectionProvider {
       this.ble.startScan([]).subscribe(device => {
         if (device.name != undefined || device.advertising.kCBAdvDataLocalName != undefined) {
           //only find LightSpeed devices, ignore others
-          if (device.name.includes('LightSpeed')) {
+          if (device.name.includes('LightSpeed') || device.name.includes('raspberrypi')) {
             observer.next(device);
-          } else if (device.advertising.kCBAdvDataLocalName.includes('LightSpeed')) {
+          } else if (device.advertising.kCBAdvDataLocalName.includes('LightSpeed') || device.advertising.kCBAdvDataLocalName.includes('raspberrypi')) {
             device.name = device.advertising.kCBAdvDataLocalName;
             observer.next(device);
           }
@@ -97,7 +96,7 @@ export class ConnectionProvider {
         this.setActive(name, id);
       });
       //make sure we're using correct set of UUIDS (damnit intel)
-      this.subscribeRx(name, id);
+      //this.subscribeRx(name, id);
     }, err => {
       this.zone.run(() => { this.clearActive(id) });
       console.log('BLE connection error: ', err);
@@ -192,15 +191,22 @@ export class ConnectionProvider {
   }
 
   stop(rep): void {
-    let data: Array<number> = [1, this.workout.repsList.indexOf(rep)];
-    let data16 = new Uint16Array(data);
-    this.write(data16);
+    let buf = new ArrayBuffer(4);
+    let cmd = new Uint16Array(buf);
+
+    cmd[0] = 1;
+    cmd[1] = this.dataService.repsList.indexOf(rep);
+
+    this.write(buf);
   }
 
   stopPattern(): void {
-    let data = [1, 0];
-    let data16 = new Uint16Array(data);
-    this.write(data16);
+    let buf = new ArrayBuffer(2);
+    let cmd = new Uint16Array(buf);
+
+    cmd[0] = 4;
+    
+    this.write(buf);
   }
 
 }

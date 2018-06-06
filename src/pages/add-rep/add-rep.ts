@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { IonicPage, Platform, NavParams, ViewController, ActionSheetController, ModalController } from 'ionic-angular';
-import { WorkoutProvider } from '../../providers/workout/workout';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { DataProvider } from '../../providers/data/data';
@@ -25,17 +24,17 @@ export class AddRepPage {
     overallSpeed: null,
     speedUnit: 'sec',
     caption: '',
-    segments: []              //color, direction, startAt, distance, speed, speedUnit, msDelay
+    segments: []              //color, direction, startAt, distance, speed, speedUnit, msDelay, totalMs
   };
 
-  constructor(public viewCtrl: ViewController, public navParams: NavParams, public alerts: AlertsProvider, public dataService: DataProvider, public workout: WorkoutProvider, public modalCtrl: ModalController, public util: UtilitiesProvider, public actionCtrl: ActionSheetController, public platform: Platform) {
+  constructor(public viewCtrl: ViewController, public navParams: NavParams, public alerts: AlertsProvider, public dataService: DataProvider, public modalCtrl: ModalController, public util: UtilitiesProvider, public actionCtrl: ActionSheetController, public platform: Platform) {
     let editing = this.navParams.get('editing');
 
     if (editing) {
       this.pageTitle = "Edit Rep";
       this.buttonCaption = "Update";
 
-      this.editingId = this.workout.repsList.indexOf(editing);
+      this.editingId = this.dataService.repsList.indexOf(editing);
 
       this.selectedRepType = editing.type;
 
@@ -59,7 +58,7 @@ export class AddRepPage {
 
   blankRep(type): void {
     if (type == "Linear sprint") {
-      this.newRep.segments = [{color: "red", direction: "Forward", startAt: "0 yards", distance: null, speed: null, speedUnit: this.newRep.speedUnit, msDelay: null}];
+      this.newRep.segments = [{ color: "green", direction: "Forward", startAt: "0 yards", distance: null, speed: null, speedUnit: this.newRep.speedUnit, msDelay: null }];
     } else {
       let savedType = this.dataService.savedData.savedRepTypes[type];
 
@@ -135,32 +134,30 @@ export class AddRepPage {
   }
 
   addToWorkout(): void {
-    let valid = this.validateRep();
-
-    if (!valid) {
+    if (!this.validateRep()) {
       return
-    } else {
-      this.normalizeSpeed();
-
-      this.setAvatarColor();
-
-      if (this.selectedRepType == "Create new type...") {
-        //nothing
-      } else if (this.selectedRepType == "Linear sprint") {
-        this.newRep.caption = this.newRep.segments[0].distance + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
-      } else {
-        this.newRep.caption = this.selectedRepType + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
-      }
-
-      if (this.pageTitle == "Edit Rep") {
-        this.workout.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.newRep });
-      } else {
-        this.workout.repsList.push({ type: this.selectedRepType, data: this.newRep });
-      }
-
-      this.viewCtrl.dismiss();
+    }
+    if (!this.normalizeSpeeds()) {
+      return
     }
 
+    this.setAvatarColor();
+
+    if (this.selectedRepType == "Create new type...") {
+      //nothing
+    } else if (this.selectedRepType == "Linear sprint") {
+      this.newRep.caption = this.newRep.segments[0].distance + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
+    } else {
+      this.newRep.caption = this.selectedRepType + ", " + this.newRep.overallSpeed + " " + this.newRep.speedUnit;
+    }
+
+    if (this.pageTitle == "Edit Rep") {
+      this.dataService.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.newRep });
+    } else {
+      this.dataService.repsList.push({ type: this.selectedRepType, data: this.newRep });
+    }
+
+    this.viewCtrl.dismiss();
   }
 
   validateRep(): boolean {
@@ -204,12 +201,17 @@ export class AddRepPage {
     }
   }
 
-  normalizeSpeed(): void {
+  normalizeSpeeds(): boolean {
     if (this.selectedRepType == "Linear sprint") {
       let sprintSeg = this.newRep.segments[0];
       sprintSeg.speed = this.newRep.overallSpeed;
       sprintSeg.speedUnit = this.newRep.speedUnit;
       sprintSeg.msDelay = this.util.speedToMsDelay(sprintSeg.speed, sprintSeg.speedUnit, sprintSeg.distance);
+      sprintSeg.totalMs = Math.round(sprintSeg.msDelay * this.util.stringToNum(sprintSeg.distance) * this.dataService.savedData.nodesPerYard)
+      if (sprintSeg.totalMs >= 65000) {
+        this.alerts.okAlert("Error", "Duration of each segment must be less than 65 seconds.");
+        return false;
+      }
     } else {
       if (this.newRep.overallSpeed) {
         if (this.newRep.speedUnit == 'sec') {
@@ -220,11 +222,21 @@ export class AddRepPage {
           for (let t of this.newRep.segments) {
             let segDist = this.util.stringToNum(t.distance);
             let segSecs = (segDist / totalDistance) * parseFloat(this.newRep.overallSpeed);
+            t.totalMs = Math.round(segSecs * 1000)
             t.msDelay = this.util.speedToMsDelay(segSecs, this.newRep.speedUnit, t.distance);
+            if (t.totalMs >= 65000) {
+              this.alerts.okAlert("Error", "Duration of each segment must be less than 65 seconds.");
+              return false;
+            }
           }
         } else {
           for (let s of this.newRep.segments) {
             s.msDelay = this.util.speedToMsDelay(this.newRep.overallSpeed, this.newRep.speedUnit);
+            s.totalMs = Math.round(s.msDelay * this.util.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard)
+            if (s.totalMs >= 65000) {
+              this.alerts.okAlert("Error", "Duration of each segment must be less than 65 seconds.");
+              return false;
+            }
           }
         }
       } else {
@@ -238,9 +250,15 @@ export class AddRepPage {
 
         for (let s of this.newRep.segments) {
           s.msDelay = this.util.speedToMsDelay(s.speed, this.newRep.speedUnit, s.distance);
+          s.totalMs = Math.round(s.msDelay * this.util.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard)
+          if (s.totalMs >= 65000) {
+            this.alerts.okAlert("Error", "Duration of each segment must be less than 65 seconds.");
+            return false;
+          }
         }
       }
     }
+    return true;
   }
 
   setAvatarColor(): void {

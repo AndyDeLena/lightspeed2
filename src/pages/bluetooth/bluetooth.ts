@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { ViewController } from 'ionic-angular';
+import { IonicPage, ViewController } from 'ionic-angular';
 import { ConnectionProvider } from '../../providers/connection/connection';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 
 declare let cordova: any;
+
 
 @Component({
   selector: 'page-bluetooth',

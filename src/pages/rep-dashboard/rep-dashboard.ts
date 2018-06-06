@@ -1,11 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonicPage, Platform, ModalController, Navbar, NavController, NavParams } from 'ionic-angular';
-import { WorkoutProvider } from '../../providers/workout/workout';
 import { ConnectionProvider } from '../../providers/connection/connection';
 import { Media } from '@ionic-native/media';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { Insomnia } from '@ionic-native/insomnia';
+import { DataProvider } from '../../providers/data/data';
 
 @IonicPage()
 @Component({
@@ -38,14 +38,8 @@ export class RepDashboardPage {
   triggerSub: any = null;
   triggered: boolean = false;
 
-  intervals: any = {
-    displayTime: null,
-    hold: null,
-    trigger: null,
-    ending: null,
-  }
-
-  constructor(public navCtrl: NavController, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public util: UtilitiesProvider, public media: Media, public connection: ConnectionProvider, public modalCtrl: ModalController, public workout: WorkoutProvider, public navParams: NavParams) {
+  constructor(public navCtrl: NavController, public dataService: DataProvider, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public util: UtilitiesProvider, public media: Media, public connection: ConnectionProvider, public modalCtrl: ModalController, public navParams: NavParams) {
+    
     for (let i = 0; i < 60; i++) {
       this.mins.push(i.toFixed(0) + " min");
       this.secs.push(i.toFixed(0) + " sec");
@@ -69,11 +63,15 @@ export class RepDashboardPage {
   }
 
   addRepFields(): void {
-    for (let r of this.workout.repsList) {
+    for (let r of this.dataService.repsList) {
       r.playing = false;
       r.display = "00:00.0";
       r.go = false;
       r.timesPlayed = 0;
+      r.displayInt = null;
+      r.holdTime = null;
+      r.triggerInt = null;
+      r.endingInt = null;
     }
   }
 
@@ -89,6 +87,7 @@ export class RepDashboardPage {
 
   ionViewWillLeave() {
     this.insomnia.allowSleepAgain();
+    
     // Unregister the custom back button action for this page
     this.unregisterHwBackButton && this.unregisterHwBackButton();
   }
@@ -148,7 +147,6 @@ export class RepDashboardPage {
   }
 
   play(rep): void {
-    rep.playing = true;
     this.countdown(rep);
   }
 
@@ -160,7 +158,7 @@ export class RepDashboardPage {
       mSecs = this.util.stringToNum(this.countdownLength) * 1000;
     }
 
-    this.intervals.displayTime = setInterval(() => {
+    rep.displayInt = setInterval(() => {
 
       //update clock in LED controls
       this.updateDisplayTime(rep, mSecs, 'countdown');
@@ -175,7 +173,7 @@ export class RepDashboardPage {
 
       if (mSecs <= 0) {
         //countdown is over. Hold if necessary
-        clearInterval(this.intervals.displayTime);
+        clearInterval(rep.displayInt);
         rep.display = '00:00.0';
         this.hold(rep);
       }
@@ -187,7 +185,7 @@ export class RepDashboardPage {
       this.updateDisplayTime(rep, 'SET...');
       //random number between 1 and 5
       let rand = Math.round(Math.random() * (1 - 4) + 4) * 1000;
-      this.intervals.hold = setTimeout(() => {
+      rep.holdTime = setTimeout(() => {
         rep.display = '00:00.0';
         this.startController(rep);
       }, rand);
@@ -210,7 +208,10 @@ export class RepDashboardPage {
     this.sounds['start'].play();
 
     //send segment strings to controller. stop light show (started above) if any errors occur
-    this.connection.play(bleCmds).catch(err => {
+    this.connection.play(bleCmds).then(() => {
+      rep.playing = true;
+      console.log("REP STARTED SUCCESSFULLY");
+    }).catch(err => {
       this.stop(rep);
       this.alerts.okAlert('Error', 'An error occurred while starting the rep. Please try again.');
       console.log(err);
@@ -225,9 +226,9 @@ export class RepDashboardPage {
     rep.go = false;
 
     if (this.startOn == 'External trigger') {
-      this.intervals.trigger = setInterval(() => {
+      rep.triggerInt = setInterval(() => {
         if (this.triggered) {
-          clearInterval(this.intervals.trigger);
+          clearInterval(rep.triggerInt);
           this.triggered = false;
           this.lightShow(rep, 0, 0);
         }
@@ -240,29 +241,31 @@ export class RepDashboardPage {
   lightShow(rep, id, prevTime): void {
     let seg = rep.data.segments[id];
 
-    let segMs = seg.msDelay * (this.util.stringToNum(seg.distance) * 2);
+    let segMs = seg.msDelay * (this.util.stringToNum(seg.distance) * this.dataService.savedData.nodesPerYard);
     let clockMs = prevTime;
     let endOfSeg = clockMs + segMs;
 
     //***** DISPLAY TIME INTERVAL *****//
-    this.intervals.displayTime = setInterval(() => {
+    rep.displayInt = setInterval(() => {
       //update clock in LED controls
       this.updateDisplayTime(rep, clockMs);
       clockMs += 50;
 
       if (clockMs >= endOfSeg) {
         //segment is over
-        clearInterval(this.intervals.displayTime);
+        clearInterval(rep.displayInt);
         //play next segment if there is one
         id++;
         if (rep.data.segments[id]) {
           this.lightShow(rep, id, endOfSeg);
         } else {
+          rep.playing = false;   //done with light show
+          this.restTime(rep);
           //rep time offically goes from lighting of first node to lighting of last, but keep last node lit for delayMs so it doesn't just blink on and then off right away
-          let endWait = this.util.speedToMsDelay(seg.speed, seg.unit, seg.distance);
-          this.intervals.ending = setTimeout(() => {
+          /*let endWait = this.util.speedToMsDelay(seg.speed, seg.unit, seg.distance);
+          rep.endingTime = setTimeout(() => {
             this.restTime(rep);
-          }, endWait);
+          }, endWait); */
         }
       }
     }, 50);
@@ -275,12 +278,12 @@ export class RepDashboardPage {
 
       let mSec = (min * 60000) + (sec * 1000);
 
-      this.intervals.displayTime = setInterval(() => {
+      rep.displayInt = setInterval(() => {
         this.updateDisplayTime(rep, mSec, 'countdown');
         mSec -= 50;
         if (mSec <= 0) {
           //rest time is over. Move to next rep or end just end this one
-          clearInterval(this.intervals.displayTime);
+          clearInterval(rep.displayInt);
           this.nextRep(rep);
         }
       }, 50);
@@ -305,23 +308,24 @@ export class RepDashboardPage {
 
       if (this.autoAdvReps || this.shuffleReps) {
         if (this.shuffleReps) {
-          let l = this.workout.repsList.length;
+          let l = this.dataService.repsList.length;
           id = Math.floor(Math.random() * (0 - l) + l);
         } else {
-          id = this.workout.repsList.indexOf(rep);
+          id = this.dataService.repsList.indexOf(rep);
           id++;
-          if (id >= this.workout.repsList.length) {
+          if (id >= this.dataService.repsList.length) {
             id = 0;
           }
         }
 
-        newRep = this.workout.repsList[id];
+        newRep = this.dataService.repsList[id];
         this.play(newRep);
       }
     }
   }
 
-  stop(rep): void {
+  stop(rep): void { 
+
     this.connection.stop(rep);
 
     rep.playing = false;
@@ -329,15 +333,17 @@ export class RepDashboardPage {
     rep.go = false;
     rep.timesPlayed = 0;
 
-    clearInterval(this.intervals.displayTime);
-    clearInterval(this.intervals.trigger);
-    clearTimeout(this.intervals.hold);
-    clearTimeout(this.intervals.ending);
+    clearInterval(rep.displayInt);
+    clearInterval(rep.triggerInt);
+    clearTimeout(rep.holdTime);
+    //clearTimeout(this.intervals.ending);
   }
 
   done(): void {
-    for (let rep of this.workout.repsList) {
-      this.stop(rep);
+    for (let rep of this.dataService.repsList) {
+      if(rep.playing){
+        this.stop(rep);
+      }
     }
 
     this.navCtrl.pop();

@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { IonicPage, Navbar, NavController, NavParams, Platform } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { DataProvider } from '../../providers/data/data';
 import { ConnectionProvider } from '../../providers/connection/connection';
 import { AlertsProvider } from '../../providers/alerts/alerts';
+import { Insomnia } from '@ionic-native/insomnia';
 
 @IonicPage()
 @Component({
@@ -11,9 +12,12 @@ import { AlertsProvider } from '../../providers/alerts/alerts';
   templateUrl: 'random-pattern.html',
 })
 export class RandomPatternPage {
+  @ViewChild(Navbar) navBar: Navbar;
+
+  unregisterHwBackButton: any;
 
   colors: Array<string> = [];
-  selectedColor: string = "red";
+  selectedColor: string = "green";
 
   staticOrDynamic: string = "static";
 
@@ -35,12 +39,46 @@ export class RandomPatternPage {
 
   playTimeout: any = null;
 
-  constructor(public navCtrl: NavController, public alerts: AlertsProvider, public connection: ConnectionProvider, public dataService: DataProvider, public navParams: NavParams, public util: UtilitiesProvider) {
+  constructor(public navCtrl: NavController, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public connection: ConnectionProvider, public dataService: DataProvider, public navParams: NavParams, public util: UtilitiesProvider) {
     this.colors = this.dataService.colors;
   }
 
   ionViewDidLoad() {
     this.dataService.updateSystemLength(this.dataService.savedData.systemLength);
+
+    if (this.platform.is('ios')) {
+      this.iosBackButtonAction();
+    } else {
+      this.androidHwBackButtonAction();
+    }
+
+    this.insomnia.keepAwake();
+
+  }
+
+  ionViewWillLeave() {
+    this.insomnia.allowSleepAgain();
+    
+    // Unregister the custom back button action for this page
+    this.unregisterHwBackButton && this.unregisterHwBackButton();
+  }
+
+  iosBackButtonAction(): void {
+    //custom back button logic for this page b/c user might want to save splits
+    this.navBar.backButtonClick = () => {
+      this.done();
+    }
+  }
+
+  androidHwBackButtonAction(): void {
+    this.unregisterHwBackButton = this.platform.registerBackButtonAction(() => {
+      this.done();
+    });
+  }
+
+  done(): void {
+    this.stop();
+    this.navCtrl.pop();
   }
 
   public convertToNumber(event): number { return +event; }
@@ -48,18 +86,18 @@ export class RandomPatternPage {
   play(): void {
     this.playing = true;
 
-    let len = this.util.stringToNum(this.dataService.savedData.systemLength) * 2;
+    let len = this.util.stringToNum(this.dataService.savedData.systemLength) * this.dataService.savedData.nodesPerYard;
     let sec = this.dataService.savedData.numSections;
     let interval = len / sec;
 
     if (this.staticOrDynamic == "static") {
-      this.playStatic(interval);
+      this.playStatic(len, interval);
     } else {
       this.playDynamic(len, interval);
     }
   }
 
-  playStatic(interval): void {
+  playStatic(len, interval): void {
     let valid = this.validateStatic();
     if (!valid) {
       this.playing = false;
@@ -78,7 +116,7 @@ export class RandomPatternPage {
         return;
       }
       node = Math.floor(Math.random() * (0 - interval) + interval);
-      cmd = this.util.buildStaticCommands(this.selectedColor, node, interval);
+      cmd = this.util.buildStaticCommands(this.selectedColor, node, interval, len);
       console.log(cmd);
       this.connection.write(cmd).then(res => {
         console.log(res);
@@ -110,15 +148,17 @@ export class RandomPatternPage {
       Backward: this.util.speedToMsDelay(this.backwardSpeed, this.backwardSpeedUnit),
     }
 
-    let direct = "Forward";
+    let direct = "Backward";
 
     let endTime = Date.now() + (this.duration * 1000);
+
+    let node = 0;
 
     let internalCallback = () => {
       if (Date.now() > endTime) {
         this.stop();
         return;
-      }
+      } 
 
       if (direct == "Forward") {
         direct = "Backward";
@@ -127,7 +167,7 @@ export class RandomPatternPage {
       }
 
       let chg = this.chgDelay ? this.chgDelay * 1000 : 0;
-      cmd = this.util.buildDynamicCommands(this.selectedColor, interval, direct, speeds[direct], len, chg);
+      cmd = this.util.buildDynamicCommands(this.selectedColor, node, interval, direct, speeds[direct], len, chg);
       console.log(cmd);
       this.connection.write(cmd).catch(err => {
         this.stop();
@@ -135,8 +175,10 @@ export class RandomPatternPage {
         return;
       });
 
-      let s = interval / 5;
-      wait = ((speeds[direct] * 5) * Math.floor(Math.random() * (1 - s) + s)) + chg;
+      let x = this.dataService.savedData.nodesPerYard * 2.5;
+      let randSections = Math.floor(Math.random() * (1 - x))
+      let s = interval / x
+      wait = ((speeds[direct] * x) * Math.floor(Math.random() * (1 - s) + s)) + chg;
       console.log(wait);
       this.playTimeout = setTimeout(() => {
         internalCallback();
@@ -158,10 +200,13 @@ export class RandomPatternPage {
     } else if (this.delayType == "Variable" && !this.maxDelay) {
       this.alerts.okAlert("Form Invalid", "Please enter a value for max delay.");
       return false;
-    } else if (this.minDelay > this.maxDelay) {
+    } else if (this.delayType == "Variable" && this.minDelay > this.maxDelay) {
       this.alerts.okAlert("Form Invalid", "Max delay must be greater than min delay.");
       return false;
-    } else if (this.minDelay < 0.5 || this.maxDelay < 0.5 || this.constDelay < 0.5){
+    } else if (this.delayType == "Variable" && (this.minDelay < 0.5 || this.maxDelay < 0.5)) {
+      this.alerts.okAlert("Form Invalid", "Minimum delay length is 0.5 seconds.");
+      return false;
+    } else if (this.delayType == 'Constant' && this.constDelay < 0.5) {
       this.alerts.okAlert("Form Invalid", "Minimum delay length is 0.5 seconds.");
       return false;
     }
@@ -197,7 +242,6 @@ export class RandomPatternPage {
   noBlePopup(): void {
     this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
   }
-
 
 
 }

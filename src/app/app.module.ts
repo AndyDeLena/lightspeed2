@@ -13,7 +13,6 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { ConnectionProvider } from '../providers/connection/connection';
 import { AlertsProvider } from '../providers/alerts/alerts';
 import { UtilitiesProvider } from '../providers/utilities/utilities';
-import { WorkoutProvider } from '../providers/workout/workout';
 import { DataProvider } from '../providers/data/data';
 
 import { IonicStorageModule } from '@ionic/storage';
@@ -52,7 +51,6 @@ import { Media } from '@ionic-native/media';
     ConnectionProvider,
     AlertsProvider,
     UtilitiesProvider,
-    WorkoutProvider,
     BLE,
     Insomnia,
     DataProvider,

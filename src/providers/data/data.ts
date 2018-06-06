@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { UtilitiesProvider } from '../utilities/utilities';
-
 
 @Injectable()
 export class DataProvider {
 
-  colors: Array<string> = ['red', 'green', 'blue'];
+  colors: Array<string> = ['green', 'blue', 'red'];
 
   maxDistance: number = 100;
   distanceOptions: Array<string> = [];
@@ -18,12 +16,16 @@ export class DataProvider {
 
   //DATA FROM/TO STORAGE
   savedData: any;
+  defaultSaveData: any;
 
   systemLength: string;
   numSections: number;
 
-  constructor(public storage: Storage, public util: UtilitiesProvider) {
-    this.savedData = {
+  //PREPROGRAMMED WOKROUT REP LIST
+  repsList: Array<any> = [];
+
+  constructor(public storage: Storage) {
+    this.defaultSaveData = {
       contents: {
         savedRepTypes: [],
         savedWorkouts: [],
@@ -33,10 +35,12 @@ export class DataProvider {
       savedWorkouts: {},
       savedPatterns: {},
       systemLength: '20 yards',
-      numSections: 1
+      numSections: 1,
+      nodesPerYard: 9,
+      maxDistance: '20 yards',
     };
-
   }
+
 
   initialize(): void {
 
@@ -53,17 +57,28 @@ export class DataProvider {
         this.numSections = this.savedData.numSections;
 
       } else {
-        this.createStorageObject();
+        this.savedData = this.defaultSaveData;
+        this.setStorageObject();
       }
     }).catch(err => {
       console.log("Error", err);
     });
   }
 
-  createStorageObject(): void {
+  stringToNum(str): number {
+    return parseFloat(str.substring(0, str.indexOf(" ")));
+  }
+
+  setStorageObject(): void {
     this.storage.set('savedData', this.savedData).catch(err => {
       console.log("Error: ", err);
     });
+  }
+
+  clearStorage(): void {
+    this.storage.clear();
+    this.savedData = this.defaultSaveData;
+    this.setStorageObject();
   }
 
   checkExists(object, key): boolean {
@@ -102,7 +117,7 @@ export class DataProvider {
 
     let maxSections = this.distanceOptions.indexOf(newLength) + 1;
     for (let i = 1; i <= maxSections; i++) {
-      let x = (this.util.stringToNum(newLength) / i) % 2.5;
+      let x = (this.stringToNum(newLength) / i) % 2.5;
       if (!x) {
         this.numSectionsOptions.push(i);
       }

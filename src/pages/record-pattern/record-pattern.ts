@@ -15,8 +15,8 @@ export class RecordPatternPage {
   recordingDelayMode: string = "Constant";
   recording: boolean = false;
 
-  availableColors: Array<string> = ['red', 'green', 'blue'];
-  selectedColor: string = "red";
+  availableColors: Array<string> = ['green', 'blue', 'red'];
+  selectedColor: string = "green";
 
   lights: Array<{ id: number, active: boolean, color: string }> = [];
   cId: number = 0;
@@ -43,7 +43,7 @@ export class RecordPatternPage {
 
   fillLights(): void {
     this.lights = [];
-    let buttons = (this.util.stringToNum(this.dataService.savedData.systemLength) * 2) / this.dataService.savedData.numSections;  //2 LEDs per yard
+    let buttons = (this.util.stringToNum(this.dataService.savedData.systemLength) * this.dataService.savedData.nodesPerYard) / this.dataService.savedData.numSections; 
     for (let i = 1; i <= buttons; i++) {
       this.lights.push({ id: i, active: false, color: 'dark' });
     }

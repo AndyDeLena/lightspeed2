@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Platform, AlertController, ModalController, ActionSheetController } from 'ionic-angular';
-import { WorkoutProvider } from '../../providers/workout/workout';
+import { IonicPage, NavController, Platform, AlertController, ModalController, ActionSheetController } from 'ionic-angular';
 import { DataProvider } from '../../providers/data/data';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { ConnectionProvider } from '../../providers/connection/connection';
@@ -11,9 +10,9 @@ import { ConnectionProvider } from '../../providers/connection/connection';
 })
 export class RepModePage {
 
-  constructor(public navCtrl: NavController, public connection: ConnectionProvider, public alerts: AlertsProvider, public dataService: DataProvider, public alertCtrl: AlertController, public workout: WorkoutProvider, public platform: Platform, public modalCtrl: ModalController, public actionCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public connection: ConnectionProvider, public alerts: AlertsProvider, public dataService: DataProvider, public alertCtrl: AlertController, public platform: Platform, public modalCtrl: ModalController, public actionCtrl: ActionSheetController) {
   }
-
+  
   openRepModal(): void {
     let modal = this.modalCtrl.create("AddRepPage");
     modal.present();
@@ -25,7 +24,7 @@ export class RepModePage {
   }
 
   removeRep(rep): void {
-    this.workout.repsList.splice(this.workout.repsList.indexOf(rep), 1);
+    this.dataService.repsList.splice(this.dataService.repsList.indexOf(rep), 1);
   }
 
   startWorkout(): void {
@@ -37,7 +36,7 @@ export class RepModePage {
   }
 
   validateWorkout(): boolean {
-    if (!this.workout.repsList.length) {
+    if (!this.dataService.repsList.length) {
       this.alerts.okAlert('Error', 'Please add at least one rep to the workout in order to continue. Reps can be added with the green "+" button above.');
       return false;
     }
@@ -94,9 +93,9 @@ export class RepModePage {
           handler: data => {
             let exists = this.dataService.checkExists('savedWorkouts', data.name);
             if (!exists) {
-              this.dataService.saveObject('savedWorkouts', data.name, this.workout.repsList);
+              this.dataService.saveObject('savedWorkouts', data.name, this.dataService.repsList);
             } else {
-              let existAlert = this.alerts.okAlert('Error', 'A saved workout with this name already exists. Please enter another.');
+              this.alerts.okAlert('Error', 'A saved workout with this name already exists. Please enter another.');
             }
           }
         }
@@ -120,7 +119,7 @@ export class RepModePage {
     alert.addButton({
       text: 'Load',
       handler: data => {
-        self.workout.repsList = JSON.parse(JSON.stringify(self.dataService.savedData.savedWorkouts[data]));
+        self.dataService.repsList = JSON.parse(JSON.stringify(self.dataService.savedData.savedWorkouts[data]));
       }
     });
     alert.present();

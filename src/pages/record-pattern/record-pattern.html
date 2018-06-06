@@ -31,8 +31,8 @@
     <div class="sep"></div>
 
 
-  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Single Light</strong></button>
-  <button *ngIf="!recording && staticOrDynamic == 'dynamic'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Streaming Pattern</strong></button>
+  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Single Light Pattern</strong></button>
+  <button *ngIf="!recording && staticOrDynamic == 'dynamic'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Streaming Light Pattern</strong></button>
   <button *ngIf="recording" ion-button class="button-80" color="red" (click)="stopRecording()"><strong>Stop Recording</strong></button>
   
 

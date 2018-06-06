@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { WorkoutProvider } from '../workout/workout';
+import { DataProvider } from '../data/data';
 
 @Injectable()
 export class UtilitiesProvider {
 
-  colorBytes: any = { red: 0, green: 1, blue: 2 };
+  colorBytes: any = { green: 0, blue: 1, red: 2 };
   directionBytes: any = { Forward: 0, Backward: 1 };
   triggerBytes: any = { "End of countdown": 0, "External trigger": 1 };
 
 
-  constructor(public workout: WorkoutProvider) {
-
+  constructor(public dataService: DataProvider) {
+  
   }
 
 
@@ -41,20 +41,21 @@ export class UtilitiesProvider {
   }
 
   speedToMsDelay(speed, unit, distance?): number {
-    //basically need to translate every UOM into ms/0.5yd
+    let numerator = Math.round(1000 / this.dataService.savedData.nodesPerYard);
+
     switch (unit) {
       case 'mph':
-        return 500 / (speed * 0.48889);             //500 because 1000ms per second and 0.5 yd light spacing
+        return numerator / (speed * 0.48889);
       case 'yd/sec':
-        return 500 / speed;
+        return numerator / speed;
       case 'ft/sec':
-        return 500 / (speed / 3);
+        return numerator / (speed / 3);
       case 'm/sec':
-        return 500 / (speed * 1.0936);              //1.0936 yards / meter
+        return numerator / (speed * 1.0936);              //1.0936 yards / meter
       case 'km/h':
-        return 500 / (speed * 0.3038);              //1 km/h = 0.3038 yd/s
+        return numerator / (speed * 0.3038);              //1 km/h = 0.3038 yd/s
       case 'sec':
-        return (speed * 1000) / ((this.stringToNum(distance) * 2));
+        return (speed * 1000) / ((this.stringToNum(distance) * this.dataService.savedData.nodesPerYard));
       default:
         return -1;
     }
@@ -64,49 +65,44 @@ export class UtilitiesProvider {
     let buf = new ArrayBuffer(18);
     let cmd = new Uint16Array(buf);
 
-    let i = 0;
-
-    cmd[i] = (0); i++;                                 //command (play)
-    cmd[i] = (this.workout.repsList.indexOf(r)); i++;   //repId
-    cmd[i] = (r.data.segments.indexOf(s)); i++;       //segId
-    cmd[i] = (this.directionBytes[s.direction]); i++;   //direction
-    cmd[i] = (this.stringToNum(s.startAt) * 2); i++;       //startAt
-    cmd[i] = (this.stringToNum(s.distance) * 2); i++;  //distance   //color
-    cmd[i] = this.colorBytes[s.color]; i++;
-    cmd[i] = (Math.round(s.msDelay)); i++;                         //speed
-    cmd[i] = (this.triggerBytes[sOn]); i++;        //trigger
+    cmd[0] = 0;                                        //command (play)
+    cmd[1] = (this.dataService.repsList.indexOf(r));         //repId
+    cmd[2] = (r.data.segments.indexOf(s));             //segId
+    cmd[3] = (this.directionBytes[s.direction]);         //direction
+    cmd[4] = (this.stringToNum(s.startAt) * this.dataService.savedData.nodesPerYard);   //startAt
+    cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard);  //distance
+    cmd[6] = this.colorBytes[s.color];                   //color
+    cmd[7] = s.totalMs;                                 //total time
+    cmd[8] = (this.triggerBytes[sOn]);                   //trigger
 
     return buf;
   }
 
-  buildStaticCommands(color, node, interval): ArrayBuffer {
-    let buf = new ArrayBuffer(8);
+  buildStaticCommands(color, node, interval, maxNode): ArrayBuffer {
+    let buf = new ArrayBuffer(10);
     let cmd = new Uint16Array(buf);
 
-    let i = 0;
-
-    cmd[i] = 2; i++;
-    cmd[i] = this.colorBytes[color]; i++;
-    cmd[i] = node; i++;
-    cmd[i] = interval; i++;
+    cmd[0] = 2; 
+    cmd[1] = this.colorBytes[color]; 
+    cmd[2] = node; 
+    cmd[3] = interval; 
+    cmd[4] = maxNode; 
 
     return buf;
   }
 
-  buildDynamicCommands(color, interval, direction, speed, maxNode, chgDelay): ArrayBuffer {
+  buildDynamicCommands(color, node, interval, direction, speed, maxNode, chgDelay): ArrayBuffer {
     let buf = new ArrayBuffer(16);
     let cmd = new Uint16Array(buf);
 
-    let i = 0;
-
-    cmd[i] = (3); i++;
-    cmd[i] = this.colorBytes[color]; i++;
-    cmd[i] = (0); i++;
-    cmd[i] = (interval); i++;
-    cmd[i] = (this.directionBytes[direction]); i++;
-    cmd[i] = (speed); i++;
-    cmd[i] = (maxNode); i++;
-    cmd[i] = (chgDelay); i++;
+    cmd[0] = 3; 
+    cmd[1] = this.colorBytes[color]; 
+    cmd[2] = node; 
+    cmd[3] = (interval); 
+    cmd[4] = (this.directionBytes[direction]); 
+    cmd[5] = (speed); 
+    cmd[6] = (maxNode); 
+    cmd[7] = (chgDelay); 
 
     return buf;
   }
@@ -118,17 +114,15 @@ export class UtilitiesProvider {
       let buf = new ArrayBuffer(18);
       let cmd = new Uint16Array(buf);
 
-      let i = 0;
-
-      cmd[i] = (0); i++;
-      cmd[i] = (0); i++;
-      cmd[i] = (record.indexOf(rec)); i++;
-      cmd[i] = (this.directionBytes[rec.direction]); i++;
-      cmd[i] = (rec.startAt); i++;
-      cmd[i] = (rec.distance); i++;
-      cmd[i] = (this.colorBytes[rec.color]); i++;
-      cmd[i] = (Math.round(rec.msDelay)); i++;
-      cmd[i] = (0); i++;
+      cmd[0] = (0); 
+      cmd[1] = (0); 
+      cmd[2] = (record.indexOf(rec)); 
+      cmd[3] = (this.directionBytes[rec.direction]); 
+      cmd[4] = (rec.startAt); 
+      cmd[5] = (rec.distance); 
+      cmd[6] = (this.colorBytes[rec.color]); 
+      cmd[7] = (Math.round(rec.msDelay)); 
+      cmd[8] = (0); 
 
       cmds.push(buf);
     }
