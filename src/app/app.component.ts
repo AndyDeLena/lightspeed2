@@ -4,11 +4,6 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Keyboard } from '@ionic-native/keyboard';
 
-import { RepModePage } from '../pages/rep-mode/rep-mode';
-import { ManualControlPage } from '../pages/manual-control/manual-control';
-import { HelpPage } from '../pages/help/help';
-import { BluetoothPage } from '../pages/bluetooth/bluetooth';
-
 import { DataProvider } from '../providers/data/data';
 
 
@@ -20,7 +15,7 @@ declare let cordova: any;
 export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any = RepModePage;
+  rootPage: any = 'RepModePage';
 
   pages: Array<{ title: string, component: any }>;
 
@@ -29,10 +24,11 @@ export class MyApp {
 
     // used for an example of ngFor and navigation
     this.pages = [
-      { title: 'Bluetooth Connect', component: BluetoothPage },
-      { title: 'Reps Mode', component: RepModePage },
-      { title: 'Manual Control', component: ManualControlPage },
-      { title: 'Help', component: HelpPage }
+      { title: 'Bluetooth Connect', component: 'BluetoothPage' },
+      { title: 'Reps Mode', component: 'RepModePage' },
+      { title: 'Manual Control', component: 'ManualControlPage' },
+      { title: 'Settings', component: 'SettingsPage'},
+      { title: 'Help', component: 'HelpPage' }
     ];
 
   }
@@ -49,7 +45,7 @@ export class MyApp {
       cordova.plugins.BluetoothStatus.initPlugin();
 
       setTimeout(() => {
-        this.openPage({ title: 'Bluetooth Connect', component: BluetoothPage });
+        this.openPage({ title: 'Bluetooth Connect', component: 'BluetoothPage' });
       }, 250);
     });
   }

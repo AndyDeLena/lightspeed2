@@ -4,6 +4,7 @@ import { DataProvider } from '../../providers/data/data';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { ConnectionProvider } from '../../providers/connection/connection';
 
+@IonicPage()
 @Component({
   selector: 'page-rep-mode',
   templateUrl: 'rep-mode.html',

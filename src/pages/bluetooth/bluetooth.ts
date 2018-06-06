@@ -5,7 +5,7 @@ import { AlertsProvider } from '../../providers/alerts/alerts';
 
 declare let cordova: any;
 
-
+@IonicPage()
 @Component({
   selector: 'page-bluetooth',
   templateUrl: 'bluetooth.html',

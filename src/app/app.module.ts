@@ -3,11 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { RepModePage } from '../pages/rep-mode/rep-mode';
-import { ManualControlPage } from '../pages/manual-control/manual-control';
-import { HelpPage } from '../pages/help/help';
-import { BluetoothPage } from '../pages/bluetooth/bluetooth';
-
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ConnectionProvider } from '../providers/connection/connection';
@@ -25,11 +20,7 @@ import { Media } from '@ionic-native/media';
 
 @NgModule({
   declarations: [
-    MyApp,
-    RepModePage,
-    ManualControlPage,
-    HelpPage,
-    BluetoothPage
+    MyApp
   ],
   imports: [
     BrowserModule,
@@ -38,11 +29,7 @@ import { Media } from '@ionic-native/media';
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp,
-    RepModePage,
-    ManualControlPage,
-    HelpPage,
-    BluetoothPage
+    MyApp
   ],
   providers: [
     StatusBar,

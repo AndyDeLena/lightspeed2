@@ -21,6 +21,9 @@ export class DataProvider {
   systemLength: string;
   numSections: number;
 
+  nodesPerYard: number = 9;
+  maxSystemLength: string = '20 yards';
+
   //PREPROGRAMMED WOKROUT REP LIST
   repsList: Array<any> = [];
 
@@ -37,11 +40,10 @@ export class DataProvider {
       systemLength: '20 yards',
       numSections: 1,
       nodesPerYard: 9,
-      maxDistance: '20 yards',
+      maxSystemLength: '20 yards',
     };
   }
-
-
+  
   initialize(): void {
 
     //INITIALIZE DISTANCE OPTIONS FOR ALL SELECT BOXES

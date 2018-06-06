@@ -11,23 +11,29 @@
 </ion-header>
 
 
-<ion-content padding>
-  <ion-item>
-    <ion-label>LEDs Per Yard</ion-label>
-    <ion-select [(ngModel)]="nodesPerYard">
+<ion-content>
+  <div class="sep-mini"></div>
+
+  <ion-item color="white">
+    <ion-label color="dark">LEDs Per Yard</ion-label>
+    <ion-select [(ngModel)]="dataService.nodesPerYard">
       <ion-option>2</ion-option>
       <ion-option>9</ion-option>
     </ion-select>
   </ion-item>
-  <ion-item>
-    <ion-label>Max System Length</ion-label>
-    <ion-select [(ngModel)]="maxDistance">
+
+  <div class="sep-mini"></div>
+
+  <ion-item color="white">
+    <ion-label color="dark">Max System Length</ion-label>
+    <ion-select [(ngModel)]="dataService.maxSystemLength">
       <ion-option *ngFor="let s of dataService.distanceOptions">{{s}}</ion-option>
     </ion-select>
   </ion-item>
 
   <div class="sep-large"></div>
 
-  <button ion-button class="button-80" color="red" (click)="clearStorage()">Clear Storage</button>
+ <!-- <button ion-button class="button-80" color="red" (click)="clearStorage()">Clear Storage</button> -->
 
+ <button ion-button class="button-80" (click)="update()">Save Changes</button>
 </ion-content>

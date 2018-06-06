@@ -209,4 +209,15 @@ export class ConnectionProvider {
     this.write(buf);
   }
 
+  updateSystemLength(newLength): void {
+    let buf = new ArrayBuffer(4);
+    let cmd = new Uint16Array(buf);
+
+    let newNodes = this.util.stringToNum(newLength) * this.dataService.nodesPerYard;
+
+    cmd[0] = 5;
+    cmd[1] = newNodes;
+    
+    this.write(buf);
+  }
 }
