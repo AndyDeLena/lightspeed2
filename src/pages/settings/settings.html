@@ -16,7 +16,7 @@
 
   <ion-item color="white">
     <ion-label color="dark">LEDs Per Yard</ion-label>
-    <ion-select [(ngModel)]="dataService.nodesPerYard">
+    <ion-select [(ngModel)]="nodesPerYard">
       <ion-option>2</ion-option>
       <ion-option>9</ion-option>
     </ion-select>
@@ -26,8 +26,8 @@
 
   <ion-item color="white">
     <ion-label color="dark">Max System Length</ion-label>
-    <ion-select [(ngModel)]="dataService.maxSystemLength">
-      <ion-option *ngFor="let s of dataService.distanceOptions">{{s}}</ion-option>
+    <ion-select [(ngModel)]="maxSystemLength">
+      <ion-option *ngFor="let m of maxOptions">{{m}}</ion-option>
     </ion-select>
   </ion-item>
 

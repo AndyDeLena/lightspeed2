@@ -61,23 +61,20 @@ export class ConnectionProvider {
     }
   }
 
+
   scan(): Observable<any> {
     return Observable.create(observer => {
       //Note in Android SDK >= 23, Location Services must be enabled. If it has not been enabled,
       //the scan method will return no results even when BLE devices are in proximity.
       this.ble.startScan([]).subscribe(device => {
-        if (device.name != undefined || device.advertising.kCBAdvDataLocalName != undefined) {
+        console.log(device)
+        if (device.name) {
           //only find LightSpeed devices, ignore others
-          if (device.name.includes('LightSpeed') || device.name.includes('raspberrypi')) {
-            observer.next(device);
-          } else if (device.advertising.kCBAdvDataLocalName.includes('LightSpeed') || device.advertising.kCBAdvDataLocalName.includes('raspberrypi')) {
-            device.name = device.advertising.kCBAdvDataLocalName;
+          if (device.name.includes('LightSpeed')) {
             observer.next(device);
           }
-        } else {
-          console.log("device.name is undefined");
         }
-      });
+      })
       //scan for 5 seconds, then notify subscriber that observable is complete
       setTimeout(() => {
         this.ble.stopScan().then(observer.complete());
@@ -87,21 +84,43 @@ export class ConnectionProvider {
 
   }
 
-  connect(name, id): void {
-    this.ble.connect(id).subscribe(data => {
-      //call setActive so that write operation will be allowed, but clear it in error handlers
-      //until we're sure that the whole phone > arduino > feather > arduino > phone chain is copacetic 
-      this.zone.run(() => {
-        this.alerts.okAlert('Connected Sucessfully');
-        this.setActive(name, id);
+  connect(name, id, reconnect): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.ble.connect(id).subscribe(data => {
+        //call setActive so that write operation will be allowed, but clear it in error handlers
+        //until we're sure that the whole phone > arduino > feather > arduino > phone chain is copacetic 
+        this.zone.run(() => {
+          this.initializeLightStrips(id).then(_ => {
+            //this.subscribeRx(name, id);
+            if (!reconnect) {
+              this.alerts.okAlert('Connected Sucessfully');
+              this.setActive(name, id);
+            }
+            resolve("OK");
+          }).catch(err => {
+            this.alerts.okAlert("Error", "Could not initialize light strips. Please try again.");
+            this.disconnect(id);
+            reject(err);
+          })
+        });
+      }, err => {
+        this.zone.run(() => { this.clearActive(id) });
+        console.log('BLE connection error: ', err);
+        this.alerts.okAlert('Bluetooth Error', 'Connection to LightSpeed has been severed. Please re-connect to continue using the system.');
       });
-      //make sure we're using correct set of UUIDS (damnit intel)
-      //this.subscribeRx(name, id);
-    }, err => {
-      this.zone.run(() => { this.clearActive(id) });
-      console.log('BLE connection error: ', err);
-      this.alerts.okAlert('Bluetooth Error', 'Connection to LightSpeed has been severed. Please re-connect to continue using the system.');
-    });
+    })
+  }
+
+  initializeLightStrips(id): Promise<any> {
+    let buf = new ArrayBuffer(4);
+    let cmd = new Uint16Array(buf);
+
+    let totalNodes = this.util.stringToNum(this.dataService.savedData.maxSystemLength) * +this.dataService.savedData.nodesPerYard;
+
+    cmd[0] = 5;
+    cmd[1] = totalNodes;
+
+    return this.ble.write(id, this.uuids.service, this.uuids.tx, buf)
   }
 
   subscribeRx(name, id): void {
@@ -134,6 +153,36 @@ export class ConnectionProvider {
         this.servicesError(id, err);
       }
     });
+  }
+
+  refreshAllConnections(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._disconnectAll().then(_ => {
+        this._reconnectAll().then(_ => {
+          resolve("OK");
+        }).catch(err => {
+          reject(err)
+        })
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  }
+
+  _disconnectAll(): Promise<any> {
+    let promises = []
+    for (let b of this.activeBoxes) {
+      promises.push(this.ble.disconnect(b.id))
+    }
+    return Promise.all(promises)
+  }
+
+  _reconnectAll(): Promise<any> {
+    let promises = [];
+    for (let b of this.activeBoxes) {
+      promises.push(this.connect(b.name, b.id, true))
+    }
+    return Promise.all(promises);
   }
 
   servicesError(id, err): void {
@@ -204,20 +253,9 @@ export class ConnectionProvider {
     let buf = new ArrayBuffer(2);
     let cmd = new Uint16Array(buf);
 
-    cmd[0] = 4;
-    
+    cmd[0] = 3;
+
     this.write(buf);
   }
 
-  updateSystemLength(newLength): void {
-    let buf = new ArrayBuffer(4);
-    let cmd = new Uint16Array(buf);
-
-    let newNodes = this.util.stringToNum(newLength) * this.dataService.nodesPerYard;
-
-    cmd[0] = 5;
-    cmd[1] = newNodes;
-    
-    this.write(buf);
-  }
 }

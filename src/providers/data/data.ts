@@ -4,19 +4,30 @@ import { Storage } from '@ionic/storage';
 @Injectable()
 export class DataProvider {
 
-  colors: Array<string> = ['green', 'blue', 'red'];
+  readonly sectionLength: number = 2.5 //group LED lights into sections of 2.5 yards
+  readonly colors: Array<string> = ['green', 'blue', 'red']
+  readonly speedUnitOptions: Array<string> = ['mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h']
+  readonly speedUnitOptionsWithSecs: Array<string> = ['sec', 'mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h']
 
-  maxDistance: number = 100;
+  maxDistance: number;
   distanceOptions: Array<string> = [];
-  numSectionsOptions: Array<number> = [1];
-
-  speedUnitOptions: Array<string> = ['mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h'];
-  speedUnitOptionsWithSecs: Array<string> = ['sec', 'mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h'];
-
+  numSectionsOptions: Array<number> = [];
 
   //DATA FROM/TO STORAGE
-  savedData: any;
-  defaultSaveData: any;
+  savedData: any = {
+    contents: {
+      savedRepTypes: [],
+      savedWorkouts: [],
+      savedPatterns: [],
+    },
+    savedRepTypes: {},
+    savedWorkouts: {},
+    savedPatterns: {},
+    systemLength: '20 yards',
+    numSections: 1,
+    nodesPerYard: 9,
+    maxSystemLength: '20 yards',
+  };
 
   systemLength: string;
   numSections: number;
@@ -28,59 +39,30 @@ export class DataProvider {
   repsList: Array<any> = [];
 
   constructor(public storage: Storage) {
-    this.defaultSaveData = {
-      contents: {
-        savedRepTypes: [],
-        savedWorkouts: [],
-        savedPatterns: [],
-      },
-      savedRepTypes: {},
-      savedWorkouts: {},
-      savedPatterns: {},
-      systemLength: '20 yards',
-      numSections: 1,
-      nodesPerYard: 9,
-      maxSystemLength: '20 yards',
-    };
+    this.initialize();
   }
-  
+
   initialize(): void {
 
-    //INITIALIZE DISTANCE OPTIONS FOR ALL SELECT BOXES
-    for (let i = 2.5; i <= this.maxDistance; i += 2.5) {
-      this.distanceOptions.push(i + " yards");
-    }
-
-    //GET STORED DATA AND PREVOIUS SESSION DATA
-    this.storage.get('savedData').then(data => {
-      if (data) {
-        this.savedData = data;
-        this.systemLength = this.savedData.systemLength;
-        this.numSections = this.savedData.numSections;
-
-      } else {
-        this.savedData = this.defaultSaveData;
-        this.setStorageObject();
+    this.storage.get('savedData').then(stored => {
+      if (stored) {
+        this.savedData = stored
+        console.log(this.savedData)
       }
+
+      this.updateMaxSystemLength(this.savedData.maxSystemLength)
+      this.updateSystemLength(this.savedData.systemLength)
+
     }).catch(err => {
-      console.log("Error", err);
-    });
+      console.error("error reading saved data from storage: ", err);
+    
+      this.updateMaxSystemLength(this.savedData.maxSystemLength)
+      this.updateSystemLength(this.savedData.systemLength)
+    })
   }
 
   stringToNum(str): number {
     return parseFloat(str.substring(0, str.indexOf(" ")));
-  }
-
-  setStorageObject(): void {
-    this.storage.set('savedData', this.savedData).catch(err => {
-      console.log("Error: ", err);
-    });
-  }
-
-  clearStorage(): void {
-    this.storage.clear();
-    this.savedData = this.defaultSaveData;
-    this.setStorageObject();
   }
 
   checkExists(object, key): boolean {
@@ -91,14 +73,19 @@ export class DataProvider {
     }
   }
 
+  saveAll(): void {
+    this.storage.set('savedData', this.savedData);
+    console.log(this.savedData)
+  }
+
   saveObject(object, key, data): void {
     this.savedData[object][key] = JSON.parse(JSON.stringify(data));
 
     this.savedData.contents[object] = Object.keys(this.savedData[object]);
 
-    this.storage.set('savedData', this.savedData).catch(err => {
+    /*this.storage.set('savedData', this.savedData).catch(err => {
       console.log("Error: ", err);
-    });
+    });*/
   }
 
   removeObject(object, key): void {
@@ -106,9 +93,9 @@ export class DataProvider {
 
     this.savedData.contents[object] = Object.keys(this.savedData[object]);
 
-    this.storage.set('savedData', this.savedData).catch(err => {
+    /*this.storage.set('savedData', this.savedData).catch(err => {
       console.log("Error: ", err);
-    });
+    });*/
   }
 
   updateSystemLength(newLength): void {
@@ -124,6 +111,20 @@ export class DataProvider {
         this.numSectionsOptions.push(i);
       }
     }
+  }
+
+  updateMaxSystemLength(newMax): void {
+    if (newMax) {
+      this.savedData.maxSystemLength = newMax
+    }
+    this.distanceOptions = [];
+    for (let i = 2.5; i <= this.stringToNum(this.savedData.maxSystemLength); i += 2.5) {
+      this.distanceOptions.push(i + " yards");
+    }
+  }
+
+  updateNodesPerYard(newNodes): void {
+    this.savedData.nodesPerYard = newNodes;
   }
 
 }
