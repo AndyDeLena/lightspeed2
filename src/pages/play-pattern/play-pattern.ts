@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { IonicPage, Navbar, NavController, NavParams, ActionSheetController, Platform } from 'ionic-angular';
+import { IonicPage, Navbar, ModalController, NavController, NavParams, ActionSheetController, Platform } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { AlertsProvider } from '../../providers/alerts/alerts';
 import { DataProvider } from '../../providers/data/data';
@@ -27,7 +27,6 @@ export class PlayPatternPage {
 
   forwardSpeed: number = null;
   backwardSpeed: number = null;
-  chgDelay: number = null;
 
   forwardSpeedUnit: string = "mph";
   backwardSpeedUnit: string = "mph";
@@ -35,7 +34,7 @@ export class PlayPatternPage {
   playing: boolean = false;
   playTimeout: any = null;
 
-  constructor(public navCtrl: NavController, public insomnia: Insomnia, public connection: ConnectionProvider, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
+  constructor(public navCtrl: NavController, public modalCtrl: ModalController, public insomnia: Insomnia, public connection: ConnectionProvider, public dataService: DataProvider, public alerts: AlertsProvider, public platform: Platform, public navParams: NavParams, public util: UtilitiesProvider, public actionCtrl: ActionSheetController) {
     this.savedPatterns = this.dataService.savedData.contents.savedPatterns;
   }
 
@@ -51,7 +50,7 @@ export class PlayPatternPage {
 
   ionViewWillLeave() {
     this.insomnia.allowSleepAgain();
-    
+
     // Unregister the custom back button action for this page
     this.unregisterHwBackButton && this.unregisterHwBackButton();
   }
@@ -71,7 +70,9 @@ export class PlayPatternPage {
 
 
   done(): void {
-    this.stop();
+    if (this.playing) {
+      this.stop();
+    }
     this.navCtrl.pop();
   }
 
@@ -138,7 +139,7 @@ export class PlayPatternPage {
       this.playing = false;
       return;
     }
-    
+
     let record = this.dataService.savedData.savedPatterns[this.patternName].record;
     let totalNodes = this.util.stringToNum(this.dataService.savedData.savedPatterns[this.patternName].systemLength) * this.dataService.savedData.nodesPerYard;
     let numSec = this.dataService.savedData.savedPatterns[this.patternName].numSections;
@@ -154,11 +155,7 @@ export class PlayPatternPage {
       console.log(cmd);
       i++;
 
-      this.connection.write(cmd).catch(err => {
-        this.stop();
-        this.alerts.okAlert("Error", "Error communicating with LED controller. Please try again.");
-        return;
-      });
+      this.connection.write(cmd);
 
       if (i == record.length) {
         this.stop();
@@ -186,34 +183,41 @@ export class PlayPatternPage {
 
     let interval = totalNodes / numSec;
 
-    let chg = this.chgDelay ? this.chgDelay * 1000 : 0;
+    let chg = this.dataService.savedData.chgDelay ? this.dataService.savedData.chgDelay * 1000 : 0;
 
     let totalMs = 0;
 
-    for (let rec of record) {
-      if (rec.direction == "Forward") {
-        rec.speed = this.forwardSpeed;
-        rec.speedUnit = this.forwardSpeedUnit;
+    for (let i = 0; i < record.length; i++) {
+      if (record[i + 1]) {
+        if (record[i].direction == record[i + 1].direction) {
+          record[i].chgDelay = 0
+        } else {
+          record[i].chgDelay = chg
+        }
       } else {
-        rec.speed = this.backwardSpeed;
-        rec.speedUnit = this.backwardSpeedUnit;
+        record[i].chgDelay = 0
       }
-      rec.msDelay = this.util.speedToMsDelay(rec.speed, rec.speedUnit);
-      totalMs += rec.msDelay * rec.distance;
+
+      if (record[i].direction == "Forward") {
+        record[i].speed = this.forwardSpeed;
+        record[i].speedUnit = this.forwardSpeedUnit;
+      } else {
+        record[i].speed = this.backwardSpeed;
+        record[i].speedUnit = this.backwardSpeedUnit;
+      }
+      record[i].totalMs = this.util.speedToMsDelay(record[i].speed, record[i].speedUnit) * record[i].distance
+      totalMs += record[i].totalMs + chg
     }
 
     let cmds = this.util.buildRecordedDynamic(record, interval, chg);
 
     console.log(cmds);
 
-    this.connection.play(cmds).catch(err => {
-      this.alerts.okAlert("Error", "An error occurred while starting the pattern. Please try again.");
-      this.stop();
-      return;
-    });
+    this.connection.play(cmds);
 
     this.playTimeout = setTimeout(() => {
-      this.stop();
+      clearTimeout(this.playTimeout);
+      this.playing = false;
     }, totalMs);
 
   }
@@ -255,14 +259,14 @@ export class PlayPatternPage {
   }
 
   stop(): void {
-    this.connection.stopPattern();
+    this.patternType == 'static' ? this.connection.stopPattern() : this.connection.stopDynamic();
     clearTimeout(this.playTimeout);
     this.playing = false;
   }
 
   noBlePopup(): void {
-    this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
+    let bleModal = this.modalCtrl.create("BluetoothPage");
+    bleModal.present();
   }
 
 }
- 

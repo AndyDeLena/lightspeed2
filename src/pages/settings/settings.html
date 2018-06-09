@@ -15,7 +15,7 @@
   <div class="sep-mini"></div>
 
   <ion-item color="white">
-    <ion-label color="dark">LEDs Per Yard</ion-label>
+    <ion-label color="dark">LEDs per yard</ion-label>
     <ion-select [(ngModel)]="nodesPerYard">
       <ion-option>2</ion-option>
       <ion-option>9</ion-option>
@@ -25,10 +25,19 @@
   <div class="sep-mini"></div>
 
   <ion-item color="white">
-    <ion-label color="dark">Max System Length</ion-label>
+    <ion-label color="dark">Max system length</ion-label>
     <ion-select [(ngModel)]="maxSystemLength">
       <ion-option *ngFor="let m of maxOptions">{{m}}</ion-option>
     </ion-select>
+  </ion-item>
+
+  <div class="sep-mini"></div>
+
+  <ion-item color="white" no-lines>
+   <ion-label color="dark">Direction change delay</ion-label>
+   <ion-select [(ngModel)]="chgDelay">
+     <ion-option *ngFor="let c of chgOptions">{{c}}</ion-option>
+   </ion-select>
   </ion-item>
 
   <div class="sep-large"></div>
@@ -36,4 +45,9 @@
  <!-- <button ion-button class="button-80" color="red" (click)="clearStorage()">Clear Storage</button> -->
 
  <button ion-button class="button-80" (click)="update()">Save Changes</button>
+
+ <div class="sep-large"></div>
+
+ <button ion-button color="red" class="button-80" (click)="clearStorage()">Clear Storage</button>
+
 </ion-content>

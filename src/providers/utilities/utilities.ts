@@ -62,7 +62,7 @@ export class UtilitiesProvider {
   }
 
   buildRepCommands(r, s, sOn): ArrayBuffer {
-    let buf = new ArrayBuffer(18);
+    let buf = new ArrayBuffer(20);
     let cmd = new Uint16Array(buf);
 
     cmd[0] = 0;                                        //command (play)
@@ -73,9 +73,28 @@ export class UtilitiesProvider {
     cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard);  //distance
     cmd[6] = this.colorBytes[s.color];                   //color
     cmd[7] = s.totalMs;                                 //total time
-    cmd[8] = (this.triggerBytes[sOn]);                   //trigger
+    cmd[8] = 0;                                          //change delay always 0 for preprogrammed
+    cmd[9] = (this.triggerBytes[sOn]);                   //trigger
 
     return buf;
+  }
+
+  buildDynamicCommands(s): ArrayBuffer {
+    let buf = new ArrayBuffer(20);
+    let cmd = new Uint16Array(buf);
+
+    cmd[0] = 5;                                        //command (play)
+    cmd[1] = s.mirror                                //mirror interval
+    cmd[2] = s.segId          //segId
+    cmd[3] = (this.directionBytes[s.direction]);         //direction
+    cmd[4] = s.startAt  //startAt
+    cmd[5] = s.distance  //distance
+    cmd[6] = this.colorBytes[s.color];                   //color
+    cmd[7] = s.totalMs;                                 //total time
+    cmd[8] = s.chgDelay;                                          //change delay always 0 for preprogrammed
+    cmd[9] = 0;                   //trigger
+
+    return buf
   }
 
   buildStaticCommands(color, node, interval, maxNode): ArrayBuffer {
@@ -91,38 +110,23 @@ export class UtilitiesProvider {
     return buf;
   }
 
-  buildDynamicCommands(color, node, interval, direction, speed, maxNode, chgDelay): ArrayBuffer {
-    let buf = new ArrayBuffer(16);
-    let cmd = new Uint16Array(buf);
-
-    cmd[0] = 3; 
-    cmd[1] = this.colorBytes[color]; 
-    cmd[2] = node; 
-    cmd[3] = (interval); 
-    cmd[4] = (this.directionBytes[direction]); 
-    cmd[5] = (speed); 
-    cmd[6] = (maxNode); 
-    cmd[7] = (chgDelay); 
-
-    return buf;
-  }
-
   buildRecordedDynamic(record, interval, chg): Array<ArrayBuffer> {
     let cmds = [];
 
     for (let rec of record) {
-      let buf = new ArrayBuffer(18);
+      let buf = new ArrayBuffer(20);
       let cmd = new Uint16Array(buf);
 
-      cmd[0] = (0); 
-      cmd[1] = (0); 
-      cmd[2] = (record.indexOf(rec)); 
-      cmd[3] = (this.directionBytes[rec.direction]); 
-      cmd[4] = (rec.startAt); 
-      cmd[5] = (rec.distance); 
-      cmd[6] = (this.colorBytes[rec.color]); 
-      cmd[7] = (Math.round(rec.msDelay)); 
-      cmd[8] = (0); 
+      cmd[0] = (0);                    //command
+      cmd[1] = (0);                    //repID
+      cmd[2] = (record.indexOf(rec));  //segID
+      cmd[3] = (this.directionBytes[rec.direction]);  //direction
+      cmd[4] = (rec.startAt);          //startAt
+      cmd[5] = (rec.distance);        //distance
+      cmd[6] = (this.colorBytes[rec.color]); //color
+      cmd[7] = rec.totalMs            //segment milliseconds
+      cmd[8] = rec.chgDelay;          //change delay
+      cmd[9] = 0                      //trigger
 
       cmds.push(buf);
     }

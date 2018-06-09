@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
+import { AlertsProvider } from '../alerts/alerts';
 
 @Injectable()
 export class DataProvider {
@@ -14,20 +15,23 @@ export class DataProvider {
   numSectionsOptions: Array<number> = [];
 
   //DATA FROM/TO STORAGE
-  savedData: any = {
-    contents: {
-      savedRepTypes: [],
-      savedWorkouts: [],
-      savedPatterns: [],
-    },
-    savedRepTypes: {},
-    savedWorkouts: {},
-    savedPatterns: {},
-    systemLength: '20 yards',
-    numSections: 1,
-    nodesPerYard: 9,
-    maxSystemLength: '20 yards',
-  };
+  savedData: any = {}
+
+  defaultData: any = {
+      contents: {
+        savedRepTypes: [],
+        savedWorkouts: [],
+        savedPatterns: [],
+      },
+      savedRepTypes: {},
+      savedWorkouts: {},
+      savedPatterns: {},
+      systemLength: '20 yards',
+      numSections: 1,
+      nodesPerYard: 9,
+      maxSystemLength: '20 yards',
+      chgDelay: 0.5
+    };
 
   systemLength: string;
   numSections: number;
@@ -38,11 +42,13 @@ export class DataProvider {
   //PREPROGRAMMED WOKROUT REP LIST
   repsList: Array<any> = [];
 
-  constructor(public storage: Storage) {
+  constructor(public storage: Storage, public alerts: AlertsProvider) {
     this.initialize();
   }
 
   initialize(): void {
+
+    this.savedData = this.defaultData
 
     this.storage.get('savedData').then(stored => {
       if (stored) {
@@ -83,19 +89,15 @@ export class DataProvider {
 
     this.savedData.contents[object] = Object.keys(this.savedData[object]);
 
-    /*this.storage.set('savedData', this.savedData).catch(err => {
-      console.log("Error: ", err);
-    });*/
+    this.storage.set('savedData', this.savedData);
   }
 
   removeObject(object, key): void {
     delete this.savedData[object][key];
 
     this.savedData.contents[object] = Object.keys(this.savedData[object]);
-
-    /*this.storage.set('savedData', this.savedData).catch(err => {
-      console.log("Error: ", err);
-    });*/
+    
+    this.storage.set('savedData', this.savedData);
   }
 
   updateSystemLength(newLength): void {
@@ -111,6 +113,7 @@ export class DataProvider {
         this.numSectionsOptions.push(i);
       }
     }
+    this.storage.set('savedData', this.savedData);
   }
 
   updateMaxSystemLength(newMax): void {
@@ -121,10 +124,29 @@ export class DataProvider {
     for (let i = 2.5; i <= this.stringToNum(this.savedData.maxSystemLength); i += 2.5) {
       this.distanceOptions.push(i + " yards");
     }
+    this.storage.set('savedData', this.savedData);
   }
 
   updateNodesPerYard(newNodes): void {
     this.savedData.nodesPerYard = newNodes;
+    this.storage.set('savedData', this.savedData);
+  }
+
+  updateChgDelay(newChg): void {
+    this.savedData.chgDelay = this.stringToNum(newChg);
+    this.storage.set('savedData', this.savedData);
+  }
+
+  clearStorage(): void {
+    this.savedData = this.defaultData
+    this.storage.clear().then( _ => {
+      this.storage.set('savedData', this.savedData).then( _ => {
+        this.alerts.okAlert("Storage cleared");
+      })
+    }).catch(err => {
+      console.error(err)
+      this.alerts.okAlert("Failed to clear storage");
+    })
   }
 
 }

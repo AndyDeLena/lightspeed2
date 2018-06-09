@@ -83,7 +83,7 @@ export class BluetoothPage {
   }
 
   connect(name, id): void {
-    this.connection.connect(name, id, false);
+    this.connection.connect(name, id);
   }
 
   disconnect(id): void {

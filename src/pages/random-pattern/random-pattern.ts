@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { IonicPage, Navbar, NavController, NavParams, Platform } from 'ionic-angular';
+import { IonicPage, Navbar, ModalController, NavController, NavParams, Platform } from 'ionic-angular';
 import { UtilitiesProvider } from '../../providers/utilities/utilities';
 import { DataProvider } from '../../providers/data/data';
 import { ConnectionProvider } from '../../providers/connection/connection';
@@ -30,7 +30,8 @@ export class RandomPatternPage {
 
   forwardSpeed: number = null;
   backwardSpeed: number = null;
-  chgDelay: number = null;
+
+  startAt: string = "Beginning"
 
   forwardSpeedUnit: string = "mph";
   backwardSpeedUnit: string = "mph";
@@ -39,7 +40,7 @@ export class RandomPatternPage {
 
   playTimeout: any = null;
 
-  constructor(public navCtrl: NavController, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public connection: ConnectionProvider, public dataService: DataProvider, public navParams: NavParams, public util: UtilitiesProvider) {
+  constructor(public navCtrl: NavController, public modalCtrl: ModalController, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public connection: ConnectionProvider, public dataService: DataProvider, public navParams: NavParams, public util: UtilitiesProvider) {
     this.colors = this.dataService.colors;
   }
 
@@ -58,7 +59,7 @@ export class RandomPatternPage {
 
   ionViewWillLeave() {
     this.insomnia.allowSleepAgain();
-    
+
     // Unregister the custom back button action for this page
     this.unregisterHwBackButton && this.unregisterHwBackButton();
   }
@@ -77,7 +78,9 @@ export class RandomPatternPage {
   }
 
   done(): void {
-    this.stop();
+    if (this.playing) {
+      this.stop();
+    }
     this.navCtrl.pop();
   }
 
@@ -86,23 +89,23 @@ export class RandomPatternPage {
   play(): void {
     this.playing = true;
 
-    let len = this.util.stringToNum(this.dataService.savedData.systemLength) * this.dataService.savedData.nodesPerYard;
-    let sec = this.dataService.savedData.numSections;
-    let interval = len / sec;
-
     if (this.staticOrDynamic == "static") {
-      this.playStatic(len, interval);
+      this.playStatic();
     } else {
-      this.playDynamic(len, interval);
+      this.playDynamic();
     }
   }
 
-  playStatic(len, interval): void {
+  playStatic(): void {
     let valid = this.validateStatic();
     if (!valid) {
       this.playing = false;
       return;
     }
+
+    let len = this.util.stringToNum(this.dataService.savedData.systemLength) * this.dataService.savedData.nodesPerYard;
+    let sec = this.dataService.savedData.numSections;
+    let interval = Math.floor(len / sec) + 1;
 
     let node;
     let cmd;
@@ -133,59 +136,88 @@ export class RandomPatternPage {
     internalCallback();
   }
 
-  playDynamic(len, interval): void {
+  playDynamic(): void {
     let valid = this.validateDynamic();
     if (!valid) {
       this.playing = false;
       return;
     }
 
-    let cmd;
-    let wait;
-
     let speeds = {
       Forward: this.util.speedToMsDelay(this.forwardSpeed, this.forwardSpeedUnit),
       Backward: this.util.speedToMsDelay(this.backwardSpeed, this.backwardSpeedUnit),
     }
 
-    let direct = "Backward";
+    //always start at beginning for now
 
-    let endTime = Date.now() + (this.duration * 1000);
+    let dur = this.duration * 1000;
 
-    let node = 0;
+    let randDirect = Math.round(Math.random())
+    let direct = randDirect ? "Forward" : "Backward"
 
-    let internalCallback = () => {
-      if (Date.now() > endTime) {
-        this.stop();
-        return;
-      } 
+    let segId = 0;
+    let interval = this.dataService.savedData.numSections;
+    let chg = this.dataService.savedData.chgDelay ? this.dataService.savedData.chgDelay * 1000 : 0;
+    let maxNum = this.util.stringToNum(this.dataService.savedData.systemLength) / interval / 2.5
+    let mirror = Math.floor((this.util.stringToNum(this.dataService.savedData.systemLength) / interval) * this.dataService.savedData.nodesPerYard)
+    let starting;
 
+    if (this.startAt == "Beginning") {
+      starting = 0
+    } else if (this.startAt == "Middle") {
+      starting = mirror / 2
+    } else {
+      starting = mirror
+    }
+
+    let bleCmds = []
+
+    do {
+      let s = { segId: segId, direction: direct, startAt: starting, distance: 0, color: this.selectedColor, totalMs: 0, chgDelay: chg, mirror: mirror};
+      let randSections = Math.round(Math.random() * (1 - maxNum) + maxNum);
+
+      s.distance = Math.floor(randSections * this.dataService.savedData.nodesPerYard * 2.5);
       if (direct == "Forward") {
-        direct = "Backward";
+        if (s.startAt + s.distance > mirror) {
+          s.distance = mirror - s.startAt
+        }
       } else {
-        direct = "Forward";
+        if (s.startAt - s.distance < 0) {
+          s.distance = s.startAt
+        }
+      }
+      if (s.distance == 0) {
+        direct = direct == "Forward" ? "Backward" : "Forward"
+        continue
       }
 
-      let chg = this.chgDelay ? this.chgDelay * 1000 : 0;
-      cmd = this.util.buildDynamicCommands(this.selectedColor, node, interval, direct, speeds[direct], len, chg);
-      console.log(cmd);
-      this.connection.write(cmd).catch(err => {
-        this.stop();
-        this.alerts.okAlert("Error", "Error communicating with LED controller. Please try again.");
-        return;
-      });
+      let ms = speeds[direct] * s.distance;
 
-      let x = this.dataService.savedData.nodesPerYard * 2.5;
-      let randSections = Math.floor(Math.random() * (1 - x))
-      let s = interval / x
-      wait = ((speeds[direct] * x) * Math.floor(Math.random() * (1 - s) + s)) + chg;
-      console.log(wait);
-      this.playTimeout = setTimeout(() => {
-        internalCallback();
-      }, wait);
-    }
-    internalCallback();
+      if (ms > dur) {
+        s.totalMs = dur
+        s.distance = Math.round(dur / speeds[direct])
+      } else {
+        s.totalMs = ms
+      }
+
+      bleCmds.push(this.util.buildDynamicCommands(s));
+
+      starting = direct == "Forward" ? starting + s.distance : starting - s.distance
+      direct = direct == "Forward" ? "Backward" : "Forward"
+      segId++
+      dur -= (s.totalMs + s.chgDelay)
+    } while (dur > 0)
+
+
+    this.connection.play(bleCmds);
+
+    this.playTimeout = setTimeout(() => {
+      clearTimeout(this.playTimeout);
+      this.playing = false;
+    }, this.duration * 1000);
+
   }
+
 
   validateStatic(): boolean {
     if (!this.duration) {
@@ -232,7 +264,7 @@ export class RandomPatternPage {
   stop(): void {
     clearTimeout(this.playTimeout);
     this.playing = false;
-    this.connection.stopPattern();
+    this.staticOrDynamic == "static" ? this.connection.stopPattern() : this.connection.stopDynamic()
   }
 
   updateSystemLength(newLength): void {
@@ -240,7 +272,8 @@ export class RandomPatternPage {
   }
 
   noBlePopup(): void {
-    this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
+    let bleModal = this.modalCtrl.create("BluetoothPage");
+    bleModal.present();
   }
 
 

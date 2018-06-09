@@ -14,24 +14,16 @@ export class ConnectionProvider {
   availableBoxes: Array<{ name: string, id: string, connected: boolean }> = [];
   activeBoxes: Array<{ name: string, id: string }> = [];
 
-  subRetries: number = 0;
-
   uuids = {
     service: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E",
-    tx: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
-    rx: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E",
+    write: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
+    read: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E",
   }
 
-  currentRx: Observable<any>;
-  rxObserver: any;
 
   constructor(public ble: BLE, public modalCtrl: ModalController, public dataService: DataProvider, public platform: Platform, public alerts: AlertsProvider, public util: UtilitiesProvider) {
 
     this.zone = new NgZone({ enableLongStackTrace: false });
-
-    this.currentRx = Observable.create(observer => {
-      this.rxObserver = observer;
-    });
 
   }
 
@@ -84,18 +76,15 @@ export class ConnectionProvider {
 
   }
 
-  connect(name, id, reconnect): Promise<any> {
+  connect(name, id): Promise<any> {
     return new Promise((resolve, reject) => {
       this.ble.connect(id).subscribe(data => {
         //call setActive so that write operation will be allowed, but clear it in error handlers
         //until we're sure that the whole phone > arduino > feather > arduino > phone chain is copacetic 
         this.zone.run(() => {
           this.initializeLightStrips(id).then(_ => {
-            //this.subscribeRx(name, id);
-            if (!reconnect) {
-              this.alerts.okAlert('Connected Sucessfully');
-              this.setActive(name, id);
-            }
+            this.alerts.okAlert('Connected Sucessfully');
+            this.setActive(name, id);
             resolve("OK");
           }).catch(err => {
             this.alerts.okAlert("Error", "Could not initialize light strips. Please try again.");
@@ -117,88 +106,16 @@ export class ConnectionProvider {
 
     let totalNodes = this.util.stringToNum(this.dataService.savedData.maxSystemLength) * +this.dataService.savedData.nodesPerYard;
 
-    cmd[0] = 5;
+    cmd[0] = 4;
     cmd[1] = totalNodes;
 
-    return this.ble.write(id, this.uuids.service, this.uuids.tx, buf)
+    return this.ble.write(id, this.uuids.service, this.uuids.write, buf)
   }
 
-  subscribeRx(name, id): void {
-    this.ble.startNotification(id, this.uuids.service, this.uuids.rx).subscribe(d => {
-      let data = this.util.ab2str(d);
-      if (data.endsWith('AT+BLEUARTRX')) {  //this was happening sometimes. I forget exactly why. Maybe had to do with erroneously using .readString() w/ software serial. but whatever
-        data = data.substring(0, data.length - 12);
-      }
-      data = data.trim();
-      this.rxObserver.next(data);
-      console.log('RX:', data);
-    }, err => {
-      if (!this.subRetries) {
-        if (typeof (err) == 'string') {
-          if (err.includes("Could not find service") || err.includes("Attempt to invoke virtual")) {
-            this.subRetries++;
-            this.subscribeRx(name, id);
-          } else if (err == 'timed out') {
-            this.alerts.okAlert('Hardware Error', 'Please contact DomTech for support: domtechllc@gmail.com. We\'re very sorry for the inconvenience.');
-            this.ble.disconnect(id);
-            this.zone.run(() => { this.clearActive(id) });
-          } else {
-            this.unknownErrorHandler(err);
-          }
-        } else {
-          this.unknownErrorHandler(err);
-        }
-      } else {
-        this.subRetries = 0;
-        this.servicesError(id, err);
-      }
-    });
-  }
 
-  refreshAllConnections(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._disconnectAll().then(_ => {
-        this._reconnectAll().then(_ => {
-          resolve("OK");
-        }).catch(err => {
-          reject(err)
-        })
-      }).catch(err => {
-        reject(err)
-      })
-    })
-  }
-
-  _disconnectAll(): Promise<any> {
-    let promises = []
+  disconnectAll(): void {
     for (let b of this.activeBoxes) {
-      promises.push(this.ble.disconnect(b.id))
-    }
-    return Promise.all(promises)
-  }
-
-  _reconnectAll(): Promise<any> {
-    let promises = [];
-    for (let b of this.activeBoxes) {
-      promises.push(this.connect(b.name, b.id, true))
-    }
-    return Promise.all(promises);
-  }
-
-  servicesError(id, err): void {
-    //already tried both sets of UUIDs, nothing worked. Something else is wrong
-    this.zone.run(() => { this.clearActive(id) });
-    this.alerts.okAlert('Bluetooth Error', 'Could not establish services.');
-    this.ble.disconnect(id);
-    console.log(err);
-  }
-
-  unknownErrorHandler(id, err?): void {
-    this.zone.run(() => { this.clearActive(id) });
-    this.alerts.okAlert('Bluetooth Error', 'An unknown error occurred.');
-    this.ble.disconnect(id);
-    if (err) {
-      console.log(err);
+      this.disconnect(b.id)
     }
   }
 
@@ -211,32 +128,43 @@ export class ConnectionProvider {
   //**********************************************************************************//
   //************************************* INCOMING ***********************************//
   //**********************************************************************************//
-  incoming(): Observable<any> {
-    return this.currentRx;
+  readTrigger(): Promise<any> {
+    return this.ble.read(this.activeBoxes[0].id, this.uuids.service, this.uuids.read)
   }
-
 
   //**********************************************************************************//
   //************************************* OUTGOING ***********************************//
   //**********************************************************************************//
   write(data): Promise<any> {
-    let promises = [];
-    if (this.activeBoxes.length) {
-      for (let b of this.activeBoxes) {
-        promises.push(this.ble.write(b.id, this.uuids.service, this.uuids.tx, data));
+    return new Promise((resolve, reject) => {
+      let promises = [];
+      if (this.activeBoxes.length) {
+        for (let b of this.activeBoxes) {
+          promises.push(this.ble.write(b.id, this.uuids.service, this.uuids.write, data));
+        }
+        Promise.all(promises).then(_ => {
+          resolve("OK")
+        }).catch(err => {
+          reject(err)
+        })
+      } else {
+        return Promise.resolve("OK");
       }
-      return Promise.all(promises);
-    } else {
-      return Promise.resolve("OK");
-    }
+    })
   }
 
   play(bleCmds): Promise<any> {
-    let promises: Array<any> = [];
-    for (let c of bleCmds) {
-      promises.push(this.write(c));
-    }
-    return Promise.all(promises);
+    return new Promise((resolve, reject ) => {
+      let promises: Array<any> = [];
+      for (let c of bleCmds) {
+        promises.push(this.write(c));
+      }
+      return Promise.all(promises).then(_ => {
+        resolve("OK")
+      }).catch(err => {
+        reject(err)
+      })
+    })
   }
 
   stop(rep): void {
@@ -245,6 +173,16 @@ export class ConnectionProvider {
 
     cmd[0] = 1;
     cmd[1] = this.dataService.repsList.indexOf(rep);
+
+    this.write(buf);
+  }
+
+  stopDynamic(): void {
+    let buf = new ArrayBuffer(4);
+    let cmd = new Uint16Array(buf);
+
+    cmd[0] = 1;
+    cmd[1] = 0;
 
     this.write(buf);
   }

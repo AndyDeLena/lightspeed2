@@ -44,9 +44,6 @@ export class MyApp {
 
       cordova.plugins.BluetoothStatus.initPlugin();
 
-      this.platform.pause.subscribe(e => {
-        this.dataService.saveAll();
-      })
 
       setTimeout(() => {
         this.openPage({ title: 'Bluetooth Connect', component: 'BluetoothPage' });

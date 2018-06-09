@@ -74,6 +74,24 @@
     </ion-item>
 
     <div class="sep-mini"></div>
+
+    <ion-item *ngIf="!newRep.individualSpeeds" color="white">
+      <ion-label color="dark">Speed </ion-label>
+      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed" (tap)="newRep.overallSpeed = null"></ion-input>
+      <ion-select text-right [(ngModel)]="newRep.speedUnit">
+        <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item *ngIf="newRep.individualSpeeds" color="white" (tap)="newRep.overallSpeed = null">
+      <ion-label color="dark">Unit</ion-label>
+      <ion-select [(ngModel)]="newRep.speedUnit">
+        <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <div class="sep-mini"></div>
+
     <ion-list>
       <ion-item color="white">
         <ion-label>Starting At</ion-label>
@@ -85,32 +103,17 @@
           <img [src]="'assets/imgs/colors/' + seg.color + '.png'">
         </ion-avatar>
         <ion-label>{{seg.distance + " " + seg.direction}} </ion-label>
-        <ion-input [(ngModel)]="seg.speed" *ngIf="newRep.individualSpeeds" type="number" text-right item-end no-padding placeholder="Enter..." (tap)="seg.speeds = null"></ion-input>
+        <ion-input [(ngModel)]="seg.speed" *ngIf="newRep.individualSpeeds" type="number" text-right item-end no-padding placeholder="Enter..."
+          (tap)="seg.speeds = null"></ion-input>
         <p *ngIf="newRep.individualSpeeds" item-end style="margin-bottom: 8px">{{newRep.speedUnit}}</p>
       </ion-item>
     </ion-list>
 
-    <ion-item *ngIf="!newRep.individualSpeeds" color="white">
-      <ion-label color="dark">Speed </ion-label>
-      <ion-input text-right type="number" placeholder="Enter..." [(ngModel)]="newRep.overallSpeed" (tap)="newRep.overallSpeed = null"></ion-input>
-      <ion-select text-right [(ngModel)]="newRep.speedUnit">
-        <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
-      </ion-select>
-    </ion-item>
-
-    <div class="sep-mini"></div>
-
-    <ion-item *ngIf="newRep.individualSpeeds" color="white" (tap)="newRep.overallSpeed = null">
-      <ion-label color="dark">Unit</ion-label>
-      <ion-select [(ngModel)]="newRep.speedUnit">
-        <ion-option *ngFor="let s of dataService.speedUnitOptionsWithSecs">{{s}}</ion-option>
-      </ion-select>
-    </ion-item>
-
   </div>
+</ion-content>
 
-  <ion-footer>
-    <button ion-button large block (click)="addToWorkout()">
-      <strong>{{buttonCaption}}</strong>
-    </button>
-  </ion-footer>
+<ion-footer>
+  <button ion-button large block (click)="addToWorkout()">
+    <strong>{{buttonCaption}}</strong>
+  </button>
+</ion-footer>

@@ -35,11 +35,10 @@ export class RepDashboardPage {
   mins: Array<string> = [];
   secs: Array<string> = [];
 
-  triggerSub: any = null;
-  triggered: boolean = false;
+  cancelTrigger: boolean = false;
 
   constructor(public navCtrl: NavController, public dataService: DataProvider, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public util: UtilitiesProvider, public media: Media, public connection: ConnectionProvider, public modalCtrl: ModalController, public navParams: NavParams) {
-    
+
     for (let i = 0; i < 60; i++) {
       this.mins.push(i.toFixed(0) + " min");
       this.secs.push(i.toFixed(0) + " sec");
@@ -58,8 +57,6 @@ export class RepDashboardPage {
     this.insomnia.keepAwake();
 
     this.addRepFields();
-
-    this.triggerListener();
   }
 
   addRepFields(): void {
@@ -87,7 +84,7 @@ export class RepDashboardPage {
 
   ionViewWillLeave() {
     this.insomnia.allowSleepAgain();
-    
+
     // Unregister the custom back button action for this page
     this.unregisterHwBackButton && this.unregisterHwBackButton();
   }
@@ -102,13 +99,6 @@ export class RepDashboardPage {
   androidHwBackButtonAction(): void {
     this.unregisterHwBackButton = this.platform.registerBackButtonAction(() => {
       this.done();
-    });
-  }
-
-  triggerListener(): void {
-    let self = this;
-    self.triggerSub = self.connection.incoming().subscribe(data => {
-      self.triggered = true;
     });
   }
 
@@ -208,17 +198,10 @@ export class RepDashboardPage {
     this.sounds['start'].play();
 
     //send segment strings to controller. stop light show (started above) if any errors occur
-    this.connection.play(bleCmds).then(() => {
-      rep.playing = true;
-      console.log("REP STARTED SUCCESSFULLY");
-    }).catch(err => {
-      this.stop(rep);
-      this.alerts.okAlert('Error', 'An error occurred while starting the rep. Please try again.');
-      console.log(err);
-    });
-
+    this.connection.play(bleCmds);
+    rep.playing = true;
+    console.log("REP STARTED SUCCESSFULLY");
     this.trigger(rep);
-
   }
 
   trigger(rep): void {
@@ -226,13 +209,23 @@ export class RepDashboardPage {
     rep.go = false;
 
     if (this.startOn == 'External trigger') {
-      rep.triggerInt = setInterval(() => {
-        if (this.triggered) {
-          clearInterval(rep.triggerInt);
-          this.triggered = false;
-          this.lightShow(rep, 0, 0);
-        }
-      }, 10);
+      let _cb = () => {
+        this.connection.readTrigger().then(res => {
+          if (res == "1") {
+            this.lightShow(rep, 0, 0);
+          } else {
+            if (this.cancelTrigger) {
+              return;
+            } else {
+              _cb();
+            }
+          }
+        }).catch(err => {
+          console.error(err);
+          return;
+        });
+      }
+      _cb();
     } else {
       this.lightShow(rep, 0, 0);
     }
@@ -324,7 +317,7 @@ export class RepDashboardPage {
     }
   }
 
-  stop(rep): void { 
+  stop(rep): void {
 
     this.connection.stop(rep);
 
@@ -341,17 +334,18 @@ export class RepDashboardPage {
 
   done(): void {
     for (let rep of this.dataService.repsList) {
-      if(rep.playing){
+      if (rep.playing) {
         this.stop(rep);
       }
     }
-
     this.navCtrl.pop();
   }
 
   noBlePopup(): void {
-    this.alerts.okAlert("Not Connected", "Your phone is not currently connected to any LightSpeed control box. No LEDs will light. Please connect to a box via the app main menu.");
+    let bleModal = this.modalCtrl.create("BluetoothPage");
+    bleModal.present();
   }
+
 
 
 
