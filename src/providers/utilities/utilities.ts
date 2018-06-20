@@ -10,7 +10,7 @@ export class UtilitiesProvider {
 
 
   constructor(public dataService: DataProvider) {
-  
+
   }
 
 
@@ -20,6 +20,25 @@ export class UtilitiesProvider {
 
   ab2str(buf) {
     return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
+  str2ab(str) {
+    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+    var bufView = new Uint16Array(buf);
+    for (var i = 0, strLen = str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+  }
+
+  str8ab(str) {
+    var buf = new ArrayBuffer(str.length)
+    var bufView = new Uint8Array(buf)
+
+    for (let i = 0; i < str.length; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf
   }
 
   arrayToBuffer(array): ArrayBuffer {
@@ -101,11 +120,11 @@ export class UtilitiesProvider {
     let buf = new ArrayBuffer(10);
     let cmd = new Uint16Array(buf);
 
-    cmd[0] = 2; 
-    cmd[1] = this.colorBytes[color]; 
-    cmd[2] = node; 
-    cmd[3] = interval; 
-    cmd[4] = maxNode; 
+    cmd[0] = 2;
+    cmd[1] = this.colorBytes[color];
+    cmd[2] = node;
+    cmd[3] = interval;
+    cmd[4] = maxNode;
 
     return buf;
   }

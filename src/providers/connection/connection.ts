@@ -14,10 +14,13 @@ export class ConnectionProvider {
   availableBoxes: Array<{ name: string, id: string, connected: boolean }> = [];
   activeBoxes: Array<{ name: string, id: string }> = [];
 
+  versionService: string = "4244"
+  versionChar: string = "4245"
+
   uuids = {
-    service: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E",
-    write: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
-    read: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E",
+    service: "4144",
+    write: "4145",
+    read: "4146",
   }
 
 
@@ -194,6 +197,29 @@ export class ConnectionProvider {
     cmd[0] = 3;
 
     this.write(buf);
+  }
+
+  enableWifi(data): void {
+    let network = this.util.str8ab("60" + data.network)
+    let password = this.util.str8ab("61" + data.password)
+
+    this.write(network).then(res => {
+      this.write(password).then(res => {
+        this.alerts.okAlert("Success", "Rebooting system in order for changes to take effect.")
+      }).catch(err => {
+        this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
+      })
+    }).catch( err => {
+      this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
+    })
+  }
+
+  versionCheck(): Promise<any> {
+    if(this.activeBoxes.length != 1) {
+      return Promise.reject("Please connect to exactly one control box in order to check its version.")
+    } else {
+      return this.ble.read(this.activeBoxes[0].id, this.versionService, this.versionChar)
+    }
   }
 
 }

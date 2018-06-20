@@ -182,6 +182,7 @@ export class RandomPatternPage {
           s.distance = mirror - s.startAt
         }
       } else {
+        s.startAt -= 1
         if (s.startAt - s.distance < 0) {
           s.distance = s.startAt
         }
