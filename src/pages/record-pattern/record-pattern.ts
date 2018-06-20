@@ -29,10 +29,11 @@ export class RecordPatternPage {
   dynamicRecordInterval: any = null;
 
   constructor(public navCtrl: NavController, public dataService: DataProvider, public alerts: AlertsProvider, public alertCtrl: AlertController, public navParams: NavParams, public util: UtilitiesProvider) {
-    this.fillLights();
+  
   }
 
   ionViewDidLoad() {
+    this.fillLights();
     this.dataService.updateSystemLength(this.dataService.savedData.systemLength);
   }
 

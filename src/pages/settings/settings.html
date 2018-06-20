@@ -14,7 +14,7 @@
 <ion-content>
     <div class="sep-mini"></div>
 
-    <ion-item color="white">
+   <!-- <ion-item color="white">
         <ion-label color="dark">LEDs per yard</ion-label>
         <ion-select [(ngModel)]="nodesPerYard">
           <ion-option>2</ion-option>
@@ -22,7 +22,7 @@
         </ion-select>
       </ion-item>
     
-      <div class="sep-mini"></div>
+      <div class="sep-mini"></div>-->
     
       <ion-item color="white">
         <ion-label color="dark">Max system length</ion-label>
@@ -41,15 +41,12 @@
       </ion-item>
     
       <div class="sep-large"></div>
-    
-  <div class="sep-large"></div>
-  <button ion-button large class="button-80" (click)="enableWifi()">Enable Updates</button>
-  <div class="sep"></div>
-  <button ion-button large class="button-80" (click)="versionCheck()">Check Firmware Version</button>
-  <div class="sep-large"></div>
+
+      <button ion-button large class="button-80" (click)="update()">Save Changes</button>
 
 </ion-content>
 
 <ion-footer>
-    <button ion-button large block (click)="update()">Save Changes</button>
+  <button ion-button large block (click)="enableWifi()">Enable Control Box Updates</button>
+  <button ion-button large block (click)="versionCheck()">Check Box Firmware Version</button>
 </ion-footer>

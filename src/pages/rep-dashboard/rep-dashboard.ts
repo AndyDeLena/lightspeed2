@@ -36,7 +36,7 @@ export class RepDashboardPage {
   secs: Array<string> = [];
 
   cancelTrigger: boolean = false;
-
+ 
   constructor(public navCtrl: NavController, public dataService: DataProvider, public platform: Platform, public insomnia: Insomnia, public alerts: AlertsProvider, public util: UtilitiesProvider, public media: Media, public connection: ConnectionProvider, public modalCtrl: ModalController, public navParams: NavParams) {
 
     for (let i = 0; i < 60; i++) {
@@ -64,6 +64,7 @@ export class RepDashboardPage {
       r.playing = false;
       r.display = "00:00.0";
       r.go = false;
+      r.lightsActive = false;
       r.timesPlayed = 0;
       r.displayInt = null;
       r.holdTime = null;
@@ -238,6 +239,8 @@ export class RepDashboardPage {
     let clockMs = prevTime;
     let endOfSeg = clockMs + segMs;
 
+    rep.lightsActive = true;
+
     //***** DISPLAY TIME INTERVAL *****//
     rep.displayInt = setInterval(() => {
       //update clock in LED controls
@@ -252,7 +255,6 @@ export class RepDashboardPage {
         if (rep.data.segments[id]) {
           this.lightShow(rep, id, endOfSeg);
         } else {
-          rep.playing = false;   //done with light show
           this.restTime(rep);
           //rep time offically goes from lighting of first node to lighting of last, but keep last node lit for delayMs so it doesn't just blink on and then off right away
           /*let endWait = this.util.speedToMsDelay(seg.speed, seg.unit, seg.distance);
@@ -265,6 +267,8 @@ export class RepDashboardPage {
   }
 
   restTime(rep): void {
+    rep.lightsActive = false;
+
     if (this.restMins != "0 mins" || this.restSecs != "0 secs") {
       let min = this.util.stringToNum(this.restMins);
       let sec = this.util.stringToNum(this.restSecs);
@@ -318,10 +322,12 @@ export class RepDashboardPage {
   }
 
   stop(rep): void {
-
-    this.connection.stop(rep);
+    if(rep.lightsActive){
+      this.connection.stop(rep);
+    }
 
     rep.playing = false;
+    rep.lightsActive = false;
     rep.display = "00:00.0";
     rep.go = false;
     rep.timesPlayed = 0;

@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Control By Hand</ion-title>
+    <ion-buttons end>
+      <button *ngIf="!connection.activeBoxes.length" margin-right ion-button clear color="yellow" icon-only (click)="noBlePopup()">
+        <ion-icon name="warning"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content no-bounce>
+
+  <div class="sep-mini"></div>
+
+  <ion-segment [(ngModel)]="staticOrDynamic">
+    <ion-segment-button value="static">Single Light</ion-segment-button>
+    <ion-segment-button value="dynamic">Streaming Light</ion-segment-button>
+  </ion-segment>
+
+  <div class="sep"></div>
+
+  <ion-item color="white">
+    <ion-label color="dark">System length</ion-label>
+    <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.systemLength" placeholder="Select..." (ionChange)="updateSystemLength($event)">
+      <ion-option *ngFor="let opt of dataService.distanceOptions">{{opt}}</ion-option>
+    </ion-select>
+  </ion-item>
+  <ion-item color="white">
+    <ion-label color="dark">Number of sections</ion-label>
+    <ion-select [disabled]="recording" [(ngModel)]="dataService.savedData.numSections" placeholder="Select..." (ionChange)="fillLights()">
+      <ion-option *ngFor="let sec of dataService.numSectionsOptions">{{sec}}</ion-option>
+    </ion-select>
+  </ion-item>
+  <ion-item *ngIf="staticOrDynamic == 'dynamic'" color="white">
+      <ion-label color="dark">Starting at</ion-label>
+      <ion-select [(ngModel)]="startAt">
+         <ion-option>Beginning</ion-option>
+         <ion-option>Middle</ion-option>
+         <ion-option>End</ion-option>
+      </ion-select>
+    </ion-item>
+
+  <div padding class="wrap">
+    <div *ngFor="let color of availableColors" class="color-div">
+      <button ion-button block [style.border]="selectedColor == color ? '4px solid black' : ''" color="{{color}}" (click)="selectedColor = color">
+        <strong>{{color.toUpperCase()}}</strong>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="staticOrDynamic == 'static'">
+    <div class="wrap" padding>
+      <div *ngFor="let light of lights" class="light-div">
+        <button [disabled]="staticOrDynamic == 'dynamic'" *ngIf="!light.active" class="remote-button" ion-button outline color="dark" (click)=alight(light)>{{light.id}}</button>
+        <button [disabled]="staticOrDynamic == 'dynamic'" *ngIf="light.active" ion-button class="remote-button" color="{{light.color}}" (click)=unalight(light)>{{light.id}}</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="staticOrDynamic == 'dynamic'">
+        <ion-row>
+          <ion-col margin-left>
+            <strong>BACKWARD SPEED</strong>
+          </ion-col>
+          <ion-col margin-left>
+            <strong>FORWARD SPEED</strong>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-row>
+              <ion-item no-lines>
+                <ion-label stacked></ion-label>
+                <ion-input class="white-field" text-right type="number" placeholder="Enter..." [ngModel]="backwardSpeed" (ngModelChange)="backwardSpeed = convertToNumber($event)" (tap)="backwardSpeed = null"></ion-input>
+                <ion-select class="white-field" margin-top text-right [(ngModel)]="backwardSpeedUnit">
+                  <ion-option *ngFor="let s of dataService.speedUnitOptions">{{s}}</ion-option>
+                </ion-select>
+              </ion-item>
+            </ion-row>
+          </ion-col>
+          <ion-col>
+            <ion-row>
+              <ion-item no-lines>
+                <ion-label stacked></ion-label>
+                <ion-input class="white-field" text-right type="number" placeholder="Enter..." [ngModel]="forwardSpeed" (ngModelChange)="forwardSpeed = convertToNumber($event)" (tap)="forwardSpeed = null"></ion-input>
+                <ion-select class="white-field" margin-top text-right [(ngModel)]="forwardSpeedUnit">
+                  <ion-option *ngFor="let s of dataService.speedUnitOptions">{{s}}</ion-option>
+                </ion-select>
+              </ion-item>
+            </ion-row>
+          </ion-col>
+        </ion-row>
+  
+      </div>
+    
+</ion-content>
+
+<ion-footer *ngIf="staticOrDynamic == 'dynamic'">
+  <ion-row>
+    <ion-col>
+      <button ion-button block large><strong>BWD</strong></button>
+    </ion-col>
+    <ion-col>
+      <button ion-button block large><ion-icon name="pause"></ion-icon></button>
+    </ion-col>
+    <ion-col>
+      <button ion-button block large><strong>FWD</strong></button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <button ion-button block large color="danger"><strong>Reset</strong></button>
+  </ion-row>
+</ion-footer>

@@ -21,7 +21,7 @@ export class SettingsPage {
   constructor(public navCtrl: NavController, public util: UtilitiesProvider, public alertCtrl: AlertController, public alerts: AlertsProvider, public connection: ConnectionProvider, public navParams: NavParams, public dataService: DataProvider) {
     this.nodesPerYard = this.dataService.savedData.nodesPerYard;
     this.maxSystemLength = this.dataService.savedData.maxSystemLength;
-    this.chgDelay = this.dataService.savedData.chgDelay ? this.dataService.savedData.chgDelay.toFixed(1) + " sec" : "0.5 sec";
+    this.chgDelay = this.dataService.savedData.chgDelay != undefined ? this.dataService.savedData.chgDelay.toFixed(1) + " sec" : "0.5 sec";
 
     for (let i = 2.5; i <= 100; i += 2.5) {
       this.maxOptions.push(i + " yards")
@@ -42,6 +42,11 @@ export class SettingsPage {
   }
 
   enableWifi(): void {
+    if(!this.connection.activeBoxes.length){
+      this.alerts.okAlert("Error", "You must be connected via Bluetooth to at least one control box in order to send it Wifi info.")
+      return
+    }
+
     let alert = this.alertCtrl.create({
       title: "Enable Updates",
       subTitle: "Please enter your wifi network name and password. This will enable your LightSpeed control box to connect to the internet and stay up to date with all the latest features.",
@@ -73,6 +78,14 @@ export class SettingsPage {
   }
 
   versionCheck(): void {
+    if(!this.connection.activeBoxes.length) {
+      this.alerts.okAlert("Error", "You must be connected via Bluetooth to a control box in order to check its version.")
+      return
+    }
+    if(this.connection.activeBoxes.length > 1){
+      this.alerts.okAlert("Error", "You can only be connected to one control box at a time if you wish to check its version.")
+      return
+    }
     this.connection.versionCheck().then(res => {
       this.alerts.okAlert("Version " + this.util.ab2str(res))
     })

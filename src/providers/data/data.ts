@@ -4,7 +4,8 @@ import { AlertsProvider } from '../alerts/alerts';
 
 @Injectable()
 export class DataProvider {
-
+  
+  readonly version: string = "5.0.2"
   readonly sectionLength: number = 2.5 //group LED lights into sections of 2.5 yards
   readonly colors: Array<string> = ['green', 'blue', 'red']
   readonly speedUnitOptions: Array<string> = ['mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h']
@@ -28,7 +29,7 @@ export class DataProvider {
       savedPatterns: {},
       systemLength: '20 yards',
       numSections: 1,
-      nodesPerYard: 9,
+      nodesPerYard: 2,
       maxSystemLength: '20 yards',
       chgDelay: 0.5
     };

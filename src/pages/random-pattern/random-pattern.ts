@@ -105,7 +105,7 @@ export class RandomPatternPage {
 
     let len = this.util.stringToNum(this.dataService.savedData.systemLength) * this.dataService.savedData.nodesPerYard;
     let sec = this.dataService.savedData.numSections;
-    let interval = Math.floor(len / sec) + 1;
+    let interval = Math.floor(len / sec);
 
     let node;
     let cmd;
@@ -152,23 +152,26 @@ export class RandomPatternPage {
 
     let dur = this.duration * 1000;
 
-    let randDirect = Math.round(Math.random())
-    let direct = randDirect ? "Forward" : "Backward"
-
     let segId = 0;
     let interval = this.dataService.savedData.numSections;
     let chg = this.dataService.savedData.chgDelay ? this.dataService.savedData.chgDelay * 1000 : 0;
     let maxNum = this.util.stringToNum(this.dataService.savedData.systemLength) / interval / 2.5
     let mirror = Math.floor((this.util.stringToNum(this.dataService.savedData.systemLength) / interval) * this.dataService.savedData.nodesPerYard)
     let starting;
+    let direct;
 
     if (this.startAt == "Beginning") {
       starting = 0
+      direct = "Forward"
     } else if (this.startAt == "Middle") {
       starting = mirror / 2
+      let randDirect = Math.round(Math.random())
+      direct = randDirect ? "Forward" : "Backward"
     } else {
       starting = mirror
+      direct = "Backward"
     }
+    
 
     let bleCmds = []
 
@@ -184,7 +187,7 @@ export class RandomPatternPage {
       } else {
         s.startAt -= 1
         if (s.startAt - s.distance < 0) {
-          s.distance = s.startAt
+          s.distance = s.startAt + 1;
         }
       }
       if (s.distance == 0) {

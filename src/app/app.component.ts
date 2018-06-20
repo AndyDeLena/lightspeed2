@@ -28,7 +28,7 @@ export class MyApp {
       { title: 'Reps Mode', component: 'RepModePage' },
       { title: 'Manual Control', component: 'ManualControlPage' },
       { title: 'Settings', component: 'SettingsPage'},
-      { title: 'Help', component: 'HelpPage' }
+      //{ title: 'Help', component: 'HelpPage' }
     ];
 
   }

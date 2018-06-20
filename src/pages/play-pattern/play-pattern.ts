@@ -158,14 +158,16 @@ export class PlayPatternPage {
       this.connection.write(cmd);
 
       if (i == record.length) {
-        this.stop();
-        return;
+        setTimeout(() => {
+          this.stop();
+          return;
+        }, wait)
+      } else {
+        wait = this.delayType == "Constant" ? this.constDelay * 1000 : (Math.random() * (this.minDelay - this.maxDelay) + this.maxDelay) * 1000;
+        this.playTimeout = setTimeout(() => {
+          internalCallback();
+        }, wait);
       }
-
-      wait = this.delayType == "Constant" ? this.constDelay * 1000 : (Math.random() * (this.minDelay - this.maxDelay) + this.maxDelay) * 1000;
-      this.playTimeout = setTimeout(() => {
-        internalCallback();
-      }, wait);
     }
     internalCallback();
   }

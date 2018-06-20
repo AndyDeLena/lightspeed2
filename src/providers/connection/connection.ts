@@ -86,8 +86,18 @@ export class ConnectionProvider {
         //until we're sure that the whole phone > arduino > feather > arduino > phone chain is copacetic 
         this.zone.run(() => {
           this.initializeLightStrips(id).then(_ => {
-            this.alerts.okAlert('Connected Sucessfully');
             this.setActive(name, id);
+            this.versionCheck().then(res => {
+              let v = this.util.ab2str(res).trim()
+              if (v != this.dataService.version) {
+                let msg = "Your smartphone app is on version " + this.dataService.version + ", but your control box is on version " + v + ". Some functionality may not work as expected. Please update your app and/or control box to the same version. If you're not sure how to do this, send us an email at info@domtechsports.com.";
+                this.alerts.okAlert("Warning", msg);
+              }
+            }).catch(err => {
+              this.alerts.okAlert("Warning", "Could not determine control box version.");
+              console.error(err);
+            })
+            this.alerts.okAlert('Connected Sucessfully');
             resolve("OK");
           }).catch(err => {
             this.alerts.okAlert("Error", "Could not initialize light strips. Please try again.");
@@ -157,7 +167,7 @@ export class ConnectionProvider {
   }
 
   play(bleCmds): Promise<any> {
-    return new Promise((resolve, reject ) => {
+    return new Promise((resolve, reject) => {
       let promises: Array<any> = [];
       for (let c of bleCmds) {
         promises.push(this.write(c));
@@ -209,17 +219,13 @@ export class ConnectionProvider {
       }).catch(err => {
         this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
       })
-    }).catch( err => {
+    }).catch(err => {
       this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
     })
   }
 
   versionCheck(): Promise<any> {
-    if(this.activeBoxes.length != 1) {
-      return Promise.reject("Please connect to exactly one control box in order to check its version.")
-    } else {
-      return this.ble.read(this.activeBoxes[0].id, this.versionService, this.versionChar)
-    }
+    return this.ble.read(this.activeBoxes[0].id, this.versionService, this.versionChar)
   }
 
 }

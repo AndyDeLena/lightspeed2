@@ -89,12 +89,14 @@ export class UtilitiesProvider {
     cmd[2] = (r.data.segments.indexOf(s));             //segId
     cmd[3] = (this.directionBytes[s.direction]);         //direction
     cmd[4] = (this.stringToNum(s.startAt) * this.dataService.savedData.nodesPerYard);   //startAt
-    cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard);  //distance
+    cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard) - 1;  //distance
     cmd[6] = this.colorBytes[s.color];                   //color
     cmd[7] = s.totalMs;                                 //total time
     cmd[8] = 0;                                          //change delay always 0 for preprogrammed
     cmd[9] = (this.triggerBytes[sOn]);                   //trigger
 
+    console.log("rep command: ", cmd);
+   
     return buf;
   }
 
@@ -113,6 +115,8 @@ export class UtilitiesProvider {
     cmd[8] = s.chgDelay;                                          //change delay always 0 for preprogrammed
     cmd[9] = 0;                   //trigger
 
+    console.log("dynamic command: ", cmd);
+
     return buf
   }
 
@@ -125,6 +129,8 @@ export class UtilitiesProvider {
     cmd[2] = node;
     cmd[3] = interval;
     cmd[4] = maxNode;
+
+    console.log("static command: ", cmd);
 
     return buf;
   }
@@ -146,6 +152,8 @@ export class UtilitiesProvider {
       cmd[7] = rec.totalMs            //segment milliseconds
       cmd[8] = rec.chgDelay;          //change delay
       cmd[9] = 0                      //trigger
+
+      console.log("recorded dynamic command: ", cmd);
 
       cmds.push(buf);
     }
