@@ -88,10 +88,10 @@ export class UtilitiesProvider {
     cmd[1] = (this.dataService.repsList.indexOf(r));         //repId
     cmd[2] = (r.data.segments.indexOf(s));             //segId
     cmd[3] = (this.directionBytes[s.direction]);         //direction
-    cmd[4] = (this.stringToNum(s.startAt) * this.dataService.savedData.nodesPerYard);   //startAt
-    cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard) - 1;  //distance
+    cmd[4] = cmd[3] ? (this.stringToNum(s.startAt) * this.dataService.savedData.nodesPerYard) - 1 : this.stringToNum(s.startAt) * this.dataService.savedData.nodesPerYard; //startAt
+    cmd[5] = (this.stringToNum(s.distance) * this.dataService.savedData.nodesPerYard);  //distance
     cmd[6] = this.colorBytes[s.color];                   //color
-    cmd[7] = s.totalMs;                                 //total time
+    cmd[7] = s.totalMs;                                   //total time
     cmd[8] = 0;                                          //change delay always 0 for preprogrammed
     cmd[9] = (this.triggerBytes[sOn]);                   //trigger
 

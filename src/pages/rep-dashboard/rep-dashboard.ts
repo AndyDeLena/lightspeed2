@@ -69,7 +69,6 @@ export class RepDashboardPage {
       r.displayInt = null;
       r.holdTime = null;
       r.triggerInt = null;
-      r.endingInt = null;
     }
   }
 
@@ -138,6 +137,8 @@ export class RepDashboardPage {
   }
 
   play(rep): void {
+    rep.playing = true;
+
     this.countdown(rep);
   }
 
@@ -200,7 +201,7 @@ export class RepDashboardPage {
 
     //send segment strings to controller. stop light show (started above) if any errors occur
     this.connection.play(bleCmds);
-    rep.playing = true;
+
     console.log("REP STARTED SUCCESSFULLY");
     this.trigger(rep);
   }
@@ -335,7 +336,6 @@ export class RepDashboardPage {
     clearInterval(rep.displayInt);
     clearInterval(rep.triggerInt);
     clearTimeout(rep.holdTime);
-    //clearTimeout(this.intervals.ending);
   }
 
   done(): void {
