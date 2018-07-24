@@ -37,7 +37,7 @@
         <ion-option *ngFor="let c of chgOptions">{{c}}</ion-option>
       </ion-select>
     </ion-item>
-    <button ion-item detail-none style="text-align: center" color="primary" click="update()">Save Changes</button>
+    <button ion-item detail-none style="text-align: center" color="primary" (click)="update()">Save Changes</button>
   </ion-list>
 
   <div class="sep"></div>
@@ -55,7 +55,7 @@
     </ion-item> -->
     <ion-item color="white">
       <ion-label color="dark">Network Name</ion-label>
-      <ion-input type="text" [(ngModel)]="ssid"></ion-input>
+      <ion-input type="text" text-right [(ngModel)]="ssid" placeholder="Enter..."></ion-input> 
     </ion-item>
     <!--<ion-item *ngIf="security == 'wpa2'">
       <ion-label color="dark">Username</ion-label>
@@ -63,9 +63,9 @@
     </ion-item> -->
     <ion-item color="white">
       <ion-label color="dark">Password</ion-label>
-      <ion-input type="text" [(ngModel)]="password"></ion-input>
+      <ion-input type="text" text-right [(ngModel)]="password" placeholder="Enter..."></ion-input>
     </ion-item>
-    <button ion-item detail-none style="text-align: center" color="primary" click="enableWifi()">Enable Control Box Updates</button>
+    <button ion-item detail-none style="text-align: center" color="primary" (click)="enableWifi()">Enable Control Box Updates</button>
   </ion-list>
 </ion-content>
 

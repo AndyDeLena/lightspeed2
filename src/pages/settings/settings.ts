@@ -15,6 +15,9 @@ export class SettingsPage {
   maxSystemLength: string
   chgDelay: string
 
+  ssid: string
+  password: string
+
   chgOptions: Array<string> = []
   maxOptions: Array<string> = []
 
@@ -22,6 +25,8 @@ export class SettingsPage {
     this.nodesPerYard = this.dataService.savedData.nodesPerYard;
     this.maxSystemLength = this.dataService.savedData.maxSystemLength;
     this.chgDelay = this.dataService.savedData.chgDelay != undefined ? this.dataService.savedData.chgDelay.toFixed(1) + " sec" : "0.5 sec";
+    this.ssid = this.dataService.savedData.ssid;
+    this.password = this.dataService.savedData.password;
 
     for (let i = 2.5; i <= 100; i += 2.5) {
       this.maxOptions.push(i + " yards")
@@ -30,6 +35,12 @@ export class SettingsPage {
     for (let j = 0; j < 3.1; j += 0.1) {
       this.chgOptions.push(j.toFixed(1) + " sec")
     }
+  }
+
+  ionViewWillLeave() {
+    this.dataService.savedData.ssid = this.ssid
+    this.dataService.savedData.password = this.password
+    this.dataService.saveAll()
   }
 
   update() {
@@ -42,51 +53,25 @@ export class SettingsPage {
   }
 
   enableWifi(): void {
-    if(!this.connection.activeBoxes.length){
+    if (!this.connection.activeBoxes.length) {
       this.alerts.okAlert("Error", "You must be connected via Bluetooth to at least one control box in order to send it Wifi info.")
       return
     }
-
-    let alert = this.alertCtrl.create({
-      title: "Enable Updates",
-      subTitle: "Please enter your wifi network name and password. This will enable your LightSpeed control box to connect to the internet and stay up to date with all the latest features.",
-      inputs: [{
-        type: "text",
-
-      },
-      {
-        type: "text",
-        placeholder: "Network SSID...",
-        name: "network"
-      }, {
-        type: "text",
-        placeholder: "Password...",
-        name: "password"
-      }],
-      buttons: [{
-        text: "OK",
-        handler: data => {
-          if (!data.network.length) {
-            this.alerts.okAlert("Error", "Please enter a network name.")
-          } else if (!data.password.length) {
-            this.alerts.okAlert("Error", "Please enter a password.")
-          } else {
-            this.connection.enableWifi(data)
-          }
-        }
-      }, {
-        text: "Cancel"
-      }]
-    })
-    alert.present();
+    if (!this.ssid.length) {
+      this.alerts.okAlert("Error", "Please enter a network name.")
+    } else if (!this.password.length) {
+      this.alerts.okAlert("Error", "Please enter a password.")
+    } else {
+      this.connection.enableWifi(this.ssid, this.password)
+    }
   }
 
   versionCheck(): void {
-    if(!this.connection.activeBoxes.length) {
+    if (!this.connection.activeBoxes.length) {
       this.alerts.okAlert("Error", "You must be connected via Bluetooth to a control box in order to check its version.")
       return
     }
-    if(this.connection.activeBoxes.length > 1){
+    if (this.connection.activeBoxes.length > 1) {
       this.alerts.okAlert("Error", "You can only be connected to one control box at a time if you wish to check its version.")
       return
     }

@@ -210,12 +210,12 @@ export class ConnectionProvider {
     this.write(buf);
   }
 
-  enableWifi(data): void {
-    let network = this.util.str8ab("60" + data.network)
-    let password = this.util.str8ab("61" + data.password)
+  enableWifi(network, password): void {
+    let net = this.util.str8ab("60" + network)
+    let pass = this.util.str8ab("61" + password)
 
-    this.write(network).then(res => {
-      this.write(password).then(res => {
+    this.write(net).then(res => {
+      this.write(pass).then(res => {
         this.alerts.okAlert("Success", "Rebooting system in order for changes to take effect.")
       }).catch(err => {
         this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
