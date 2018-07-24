@@ -90,8 +90,9 @@ export class ConnectionProvider {
             this.versionCheck().then(res => {
               let v = this.util.ab2str(res).trim()
               if (v != this.dataService.version) {
+                this.dataService.boxVersion = v;
                 let msg = "Your smartphone app is on version " + this.dataService.version + ", but your control box is on version " + v + ". Some functionality may not work as expected. Please update your app and/or control box to the same version. If you're not sure how to do this, send us an email at info@domtechsports.com.";
-                this.alerts.okAlert("Warning", msg);
+                //this.alerts.okAlert("Warning", msg);
               }
             }).catch(err => {
               this.alerts.okAlert("Warning", "Could not determine control box version.");

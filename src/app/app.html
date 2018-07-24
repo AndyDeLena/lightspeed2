@@ -15,11 +15,12 @@
         <div class="sep-menu"></div>
         <div class="sep-menu"></div>
 
-        <img class="center" src="assets/imgs/rabbitwhite.png">
+        <img class="center" src="assets/imgs/rabbit0092ff.png">
     </ion-content>
 
     <ion-footer>
-        <p style="text-align: center; color: dimgray">Version {{dataService.version}}</p>
+        <p style="text-align: center; color: dimgray"> App Version {{dataService.version}}</p>
+        <p *ngIf="dataService.boxVersion" style="text-align: center; color: dimgray"> Controller Version {{dataService.boxVersion}}</p>
     </ion-footer>
 
 </ion-menu>

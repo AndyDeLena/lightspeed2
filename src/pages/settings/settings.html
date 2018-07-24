@@ -12,41 +12,60 @@
 
 
 <ion-content>
-    <div class="sep-mini"></div>
+  <div class="sep-mini"></div>
 
-   <!-- <ion-item color="white">
+  <ion-list>
+    <ion-list-header>
+      LED Settings
+    </ion-list-header>
+    <!--  <ion-item color="white">
         <ion-label color="dark">LEDs per yard</ion-label>
         <ion-select [(ngModel)]="nodesPerYard">
           <ion-option>2</ion-option>
           <ion-option>9</ion-option>
         </ion-select>
-      </ion-item>
-    
-      <div class="sep-mini"></div>-->
-    
-      <ion-item color="white">
-        <ion-label color="dark">Max system length</ion-label>
-        <ion-select [(ngModel)]="maxSystemLength">
-          <ion-option *ngFor="let m of maxOptions">{{m}}</ion-option>
-        </ion-select>
-      </ion-item>
-    
-      <div class="sep-mini"></div>
-    
-      <ion-item color="white" no-lines>
-       <ion-label color="dark">Direction change delay</ion-label>
-       <ion-select [(ngModel)]="chgDelay">
-         <ion-option *ngFor="let c of chgOptions">{{c}}</ion-option>
-       </ion-select>
-      </ion-item>
-    
-      <div class="sep-large"></div>
+      </ion-item> -->
+    <ion-item color="white">
+      <ion-label color="dark">Max system length</ion-label>
+      <ion-select [(ngModel)]="maxSystemLength">
+        <ion-option *ngFor="let m of maxOptions">{{m}}</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item color="white" no-lines>
+      <ion-label color="dark">Direction change delay</ion-label>
+      <ion-select [(ngModel)]="chgDelay">
+        <ion-option *ngFor="let c of chgOptions">{{c}}</ion-option>
+      </ion-select>
+    </ion-item>
+    <button ion-item detail-none style="text-align: center" color="primary" click="update()">Save Changes</button>
+  </ion-list>
 
-      <button ion-button large class="button-80" (click)="update()">Save Changes</button>
+  <div class="sep"></div>
 
+  <ion-list>
+    <ion-list-header>
+      Network Settings
+    </ion-list-header>
+    <!-- <ion-item color="white">
+      <ion-label color="dark">WiFi Login Type</ion-label>
+      <ion-select [(ngModel)]="security">
+        <ion-option value="wpa">Password Only</ion-option>
+        <ion-option value="wpa2">Username/Password</ion-option>
+      </ion-select>
+    </ion-item> -->
+    <ion-item color="white">
+      <ion-label color="dark">Network Name</ion-label>
+      <ion-input type="text" [(ngModel)]="ssid"></ion-input>
+    </ion-item>
+    <!--<ion-item *ngIf="security == 'wpa2'">
+      <ion-label color="dark">Username</ion-label>
+      <ion-input type="text" [(ngModel)]="username"></ion-input>
+    </ion-item> -->
+    <ion-item color="white">
+      <ion-label color="dark">Password</ion-label>
+      <ion-input type="text" [(ngModel)]="password"></ion-input>
+    </ion-item>
+    <button ion-item detail-none style="text-align: center" color="primary" click="enableWifi()">Enable Control Box Updates</button>
+  </ion-list>
 </ion-content>
 
-<ion-footer>
-  <button ion-button large block (click)="enableWifi()">Enable Control Box Updates</button>
-  <button ion-button large block (click)="versionCheck()">Check Box Firmware Version</button>
-</ion-footer>

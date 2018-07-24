@@ -27,7 +27,7 @@ export class SettingsPage {
       this.maxOptions.push(i + " yards")
     }
 
-    for (let j = 0; j < 2; j += 0.1) {
+    for (let j = 0; j < 3.1; j += 0.1) {
       this.chgOptions.push(j.toFixed(1) + " sec")
     }
   }
@@ -51,6 +51,10 @@ export class SettingsPage {
       title: "Enable Updates",
       subTitle: "Please enter your wifi network name and password. This will enable your LightSpeed control box to connect to the internet and stay up to date with all the latest features.",
       inputs: [{
+        type: "text",
+
+      },
+      {
         type: "text",
         placeholder: "Network SSID...",
         name: "network"

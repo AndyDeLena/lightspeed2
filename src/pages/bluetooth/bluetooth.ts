@@ -58,7 +58,7 @@ export class BluetoothPage {
     this.connection.scan().subscribe(device => {
       //don't add to availableControllers if already present
       for (let c of this.connection.availableBoxes) {
-        if (c.name === device.name) {
+        if (c.name === device.name && c.id == device.id) {
           return;
         }
       }

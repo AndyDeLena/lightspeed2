@@ -36,7 +36,7 @@ export class NewRepTypePage {
 
       this.name = name;
       this.startAt = this.dataService.savedData.savedRepTypes[name].segments[0].startAt;
-      this.segments = this.dataService.savedData.savedRepTypes[name].segments;
+      this.segments = JSON.parse(JSON.stringify(this.dataService.savedData.savedRepTypes[name].segments));
     }
   }
 
@@ -45,10 +45,10 @@ export class NewRepTypePage {
   }
 
   initializeDistances(): void {
-    this.startAtOptions.push("0 yard mark");
+    this.startAtOptions.push("0 yards");
 
     for (let i = 2.5; i <= 100; i += 2.5) {
-      this.startAtOptions.push(i + " yard mark");
+      this.startAtOptions.push(i + " yards");
     }
   }
 

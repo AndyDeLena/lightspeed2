@@ -103,7 +103,7 @@ export class AddRepPage {
   createNewRepType(): void {
     let modal = this.modalCtrl.create('NewRepTypePage');
     modal.onDidDismiss(data => {
-      this.selectedRepType = data.newName;
+      this.selectedRepType = ""
     });
     modal.present();
   }
@@ -111,7 +111,7 @@ export class AddRepPage {
   editRepType(): void {
     let modal = this.modalCtrl.create("NewRepTypePage", { name: this.selectedRepType });
     modal.onDidDismiss(data => {
-      this.selectedRepType = data.newName;
+      this.selectedRepType = ""
     });
     modal.present();
   }
@@ -152,9 +152,9 @@ export class AddRepPage {
     }
 
     if (this.pageTitle == "Edit Rep") {
-      this.dataService.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: this.newRep });
+      this.dataService.repsList.splice(this.editingId, 1, { type: this.selectedRepType, data: JSON.parse(JSON.stringify(this.newRep)) });
     } else {
-      this.dataService.repsList.push({ type: this.selectedRepType, data: this.newRep });
+      this.dataService.repsList.push({ type: this.selectedRepType, data: JSON.parse(JSON.stringify(this.newRep)) });
     }
 
     this.viewCtrl.dismiss();

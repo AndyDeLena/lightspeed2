@@ -43,6 +43,7 @@
     <ion-list>
         <ion-item color="light" *ngFor="let box of connection.availableBoxes">
             <ion-label>{{box.name}}</ion-label>
+            <p>{{box.id}}</p>
             <button *ngIf="!box.connected" ion-button item-right style="height: 40px; width: 100px" (click)="connect(box.name, box.id)">
                 <strong>Connect</strong>
             </button>

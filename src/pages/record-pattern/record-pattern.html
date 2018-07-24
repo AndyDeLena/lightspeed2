@@ -8,10 +8,10 @@
 
   <div class="sep-mini"></div>
 
-  <ion-segment [disabled]="recording" [(ngModel)]="staticOrDynamic">
+  <!--<ion-segment [disabled]="recording" [(ngModel)]="staticOrDynamic">
     <ion-segment-button value="static">Single Light</ion-segment-button>
     <ion-segment-button value="dynamic">Streaming Light</ion-segment-button>
-  </ion-segment>
+  </ion-segment>-->
 
   <div class="sep"></div>
   
@@ -31,7 +31,7 @@
     <div class="sep"></div>
 
 
-  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Single Light Pattern</strong></button>
+  <button *ngIf="!recording && staticOrDynamic == 'static'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Pattern</strong></button>
   <button *ngIf="!recording && staticOrDynamic == 'dynamic'" ion-button class="button-80" color="green" (click)="startRecording()"><strong>Record Streaming Light Pattern</strong></button>
   <button *ngIf="recording" ion-button class="button-80" color="red" (click)="stopRecording()"><strong>Stop Recording</strong></button>
   
