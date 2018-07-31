@@ -89,8 +89,8 @@ export class ConnectionProvider {
             this.setActive(name, id);
             this.versionCheck().then(res => {
               let v = this.util.ab2str(res).trim()
+              this.dataService.boxVersion = v;
               if (v != this.dataService.version) {
-                this.dataService.boxVersion = v;
                 let msg = "Your smartphone app is on version " + this.dataService.version + ", but your control box is on version " + v + ". Some functionality may not work as expected. Please update your app and/or control box to the same version. If you're not sure how to do this, send us an email at info@domtechsports.com.";
                 //this.alerts.okAlert("Warning", msg);
               }
@@ -207,7 +207,7 @@ export class ConnectionProvider {
 
     cmd[0] = 3;
 
-    this.write(buf);
+    this.write(buf); 
   }
 
   enableWifi(network, password): void {
@@ -215,11 +215,8 @@ export class ConnectionProvider {
     let pass = this.util.str8ab("61" + password)
 
     this.write(net).then(res => {
-      this.write(pass).then(res => {
-        this.alerts.okAlert("Success", "Rebooting system in order for changes to take effect.")
-      }).catch(err => {
-        this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
-      })
+      this.alerts.okAlert("Success", "Rebooting system in order for changes to take effect.")
+      this.write(pass);
     }).catch(err => {
       this.alerts.okAlert("Error", "An error occurred while sending wifi information to the controller. Please try again.")
     })

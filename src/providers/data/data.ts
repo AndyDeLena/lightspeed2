@@ -6,7 +6,7 @@ import { AlertsProvider } from '../alerts/alerts';
 export class DataProvider {
   
   boxVersion: string
-  readonly version: string = "5.0.7"
+  readonly version: string = "1.0.2"
   readonly sectionLength: number = 2.5 //group LED lights into sections of 2.5 yards
   readonly colors: Array<string> = ['green', 'blue', 'red']
   readonly speedUnitOptions: Array<string> = ['mph', 'yd/sec', 'ft/sec', 'm/sec', 'km/h']
