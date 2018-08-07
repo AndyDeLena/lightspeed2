@@ -36,13 +36,13 @@
             <ion-label color="dark">Random hold</ion-label>
             <ion-toggle [(ngModel)]="randomHold"></ion-toggle>
           </ion-item>
-          <ion-item *ngIf="connection.activeBoxes.length == 1" color="white">
+          <!--<ion-item *ngIf="connection.activeBoxes.length == 1" color="white">
             <ion-label color="dark">Start LEDs on</ion-label>
             <ion-select [(ngModel)]="startOn">
               <ion-option>End of countdown</ion-option>
               <ion-option>External trigger</ion-option>
             </ion-select>
-          </ion-item>
+          </ion-item>-->
           <ion-item color="white">
             <ion-label color="dark">Play each rep</ion-label>
             <ion-select [(ngModel)]="playEachRep">

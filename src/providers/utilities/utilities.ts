@@ -6,7 +6,7 @@ export class UtilitiesProvider {
 
   colorBytes: any = { green: 0, blue: 1, red: 2 };
   directionBytes: any = { Forward: 0, Backward: 1 };
-  triggerBytes: any = { "End of countdown": 0, "External trigger": 1 };
+  triggerBytes: any = { "End of countdown": 1, "External trigger": 0 };
 
 
   constructor(public dataService: DataProvider) {

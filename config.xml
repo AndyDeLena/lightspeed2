@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.domtech.lightspeedsprint" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.domtech.lightspeed2" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>LightSpeed</name>
     <description>Redefine Your Limits</description>
     <author email="andrewdelena@domtechsports.com" href="http://www.domtechsports.com/">DomTech Sports</author>
